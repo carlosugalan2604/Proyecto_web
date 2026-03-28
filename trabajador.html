@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DI-PYMES | Panel de Trabajador</title>
+    <link rel="stylesheet" href="style_dashboard.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="worker-body">
+
+    <header class="worker-header">
+        <div class="user-info">
+            <i class="fas fa-user-circle user-avatar"></i>
+            <div>
+                <h2>Hola, Carlos</h2>
+                <p>Turno de Mañana</p>
+            </div>
+        </div>
+        <button class="btn-logout"><i class="fas fa-sign-out-alt"></i> Salir</button>
+    </header>
+
+    <main class="worker-dashboard">
+        
+        <section class="card clock-in-card">
+            <h3>Control de Horario</h3>
+            <p id="current-time">08:00 AM</p>
+            <button class="btn-action pulse-effect">
+                <i class="fas fa-fingerprint"></i> FICHAR ENTRADA
+            </button>
+        </section>
+
+        <div class="secondary-cards">
+            
+            <section class="card tasks-card">
+                <div class="card-header">
+                    <h3><i class="fas fa-clipboard-list"></i> Mis Tareas Hoy</h3>
+                    <span class="badge">3 Pendientes</span>
+                </div>
+                <ul class="task-list">
+                    <li>
+                        <input type="checkbox" id="tarea1">
+                        <label for="tarea1">Revisar inventario pasillo 4</label>
+                    </li>
+                    <li>
+                        <input type="checkbox" id="tarea2">
+                        <label for="tarea2">Preparar pedido #1042</label>
+                    </li>
+                    <li>
+                        <input type="checkbox" id="tarea3">
+                        <label for="tarea3">Mantenimiento máquina B</label>
+                    </li>
+                </ul>
+            </section>
+
+            <section class="card stock-card">
+                <h3><i class="fas fa-barcode"></i> Control Rápido</h3>
+                <p>Escanea o busca un artículo para actualizar el stock.</p>
+                <button class="btn-outline">
+                    <i class="fas fa-camera"></i> Escanear Artículo
+                </button>
+            </section>
+
+        </div>
+
+    </main>
+
+</body>
+</html>

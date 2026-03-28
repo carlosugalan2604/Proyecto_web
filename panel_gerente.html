@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DI-PYMES | Dashboard Gerente</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <div class="sidebar">
+        <h2>DI-PYMES</h2>
+        <div class="menu-item active">📊 Dashboard General</div>
+        <div class="menu-item">📦 Gestión de Stock</div>
+        <div class="menu-item">✅ Tareas de Equipo</div>
+        <div class="menu-item">👥 Trabajadores</div>
+        <div class="menu-item" style="margin-top: 50px;">🚪 Cerrar Sesión</div>
+    </div>
+
+    <div class="main-content">
+        
+        <div class="header">
+            <h1>Visión General del Negocio</h1>
+            <div>👤 <strong>Perfil:</strong> Gerente</div>
+        </div>
+
+        <div class="cards-container">
+            <div class="card" style="border-left-color: #2196F3;">
+                <h3>Ingresos Mensuales</h3>
+                <p class="value">€ 14,350.00</p>
+            </div>
+            <div class="card" style="border-left-color: #FF9800;">
+                <h3>Tareas Pendientes</h3>
+                <p class="value">8</p>
+            </div>
+            <div class="card" style="border-left-color: #F44336;">
+                <h3>Alertas de Stock Mínimo</h3>
+                <p class="value">3 Productos</p>
+            </div>
+        </div>
+
+        <div class="table-section">
+            <h3>Atención Requerida: Inventario</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID Producto</th>
+                        <th>Nombre</th>
+                        <th>Proveedor</th>
+                        <th>Stock Actual</th>
+                        <th>Estado</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>PROD-042</td>
+                        <td>Cable Cobre 2.5mm (Rollo)</td>
+                        <td>Suministros Elect SL</td>
+                        <td>5</td>
+                        <td><span class="badge badge-warning">Bajo Stock</span></td>
+                    </tr>
+                    <tr>
+                        <td>PROD-089</td>
+                        <td>Interruptor Simple Blanco</td>
+                        <td>Distribuciones Martín</td>
+                        <td>120</td>
+                        <td><span class="badge badge-success">Óptimo</span></td>
+                    </tr>
+                    <tr>
+                        <td>PROD-105</td>
+                        <td>Tubo Corrugado 20mm</td>
+                        <td>Suministros Elect SL</td>
+                        <td>0</td>
+                        <td><span class="badge badge-warning" style="background-color: #f8d7da; color: #721c24;">Agotado</span></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+    </div>
+
+</body>
+</html>

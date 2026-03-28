@@ -1,0 +1,129 @@
+/* style_login.css */
+
+body {
+    margin: 0;
+    padding: 0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: #111e2f url('path-to-your-background-texture.png') no-repeat center center fixed;
+    background-size: cover;
+    color: white;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* --- CONTENEDOR PRINCIPAL (El que perdimos) --- */
+.login-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 40px; 
+    width: 90%;
+    max-width: 900px;
+    padding: 20px;
+}
+
+/* --- TÍTULO  --- */
+.login-title {
+    font-size: 3rem;
+    font-weight: 300;
+    color: white;
+    text-shadow: 0 0 10px cyan; 
+    text-align: center;
+    margin: 0;
+}
+
+
+.login-bar {
+    display: flex;
+    flex-direction: row;
+    gap: 20px;
+    background-color: transparent;
+    padding: 20px 0;
+    width: 100%;
+    max-width: 800px;
+    justify-content: center;
+}
+
+.login-bar input {
+    flex: 1;
+    padding: 15px 20px;
+    background-color: rgba(0, 255, 255, 0.03);
+    border: 1px solid rgba(0, 255, 255, 0.3);
+    border-radius: 8px;
+    font-size: 1rem;
+    color: #ffffff;
+    transition: all 0.3s ease;
+}
+
+.login-bar input::placeholder {
+    color: rgba(255, 255, 255, 0.5);
+}
+
+.login-bar input:focus {
+    outline: none;
+    border-color: cyan;
+    box-shadow: 0 0 12px rgba(0, 255, 255, 0.4);
+    background-color: rgba(0, 255, 255, 0.08);
+}
+
+.login-bar button {
+    flex: 0 0 auto;
+    padding: 15px 40px;
+    background-color: transparent;
+    border: 2px solid cyan;
+    border-radius: 8px;
+    color: cyan;
+    font-size: 1.1rem;
+    font-weight: bold;
+    cursor: pointer;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    transition: all 0.3s ease;
+    box-shadow: 0 0 10px rgba(0, 255, 255, 0.2), inset 0 0 10px rgba(0, 255, 255, 0.1);
+}
+
+.login-bar button:hover {
+    background-color: cyan;
+    color: #111e2f;
+    box-shadow: 0 0 20px rgba(0, 255, 255, 0.8);
+}
+
+.circles-row {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-evenly;
+    align-items: flex-start;
+    width: 100%;
+}
+
+.circle-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+}
+
+.circle-icon {
+    width: 120px;
+    height: 120px;
+    border: 2px solid cyan;
+    border-radius: 50%;
+    box-shadow: 0 0 10px cyan;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.circle-icon i {
+    font-size: 3rem;
+    color: cyan;
+}
+
+.circle-label {
+    font-size: 1rem;
+    color: white;
+    padding: 0 5px;
+}

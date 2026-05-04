@@ -1,6 +1,5 @@
   ## README — Web
 
-  ```markdown
   # DI-PYMES — Interfaz Web
 
   Interfaz web para la gestión empresarial de PYMEs desarrollada con HTML, CSS y JavaScript vanilla.

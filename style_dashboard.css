@@ -1,188 +1,867 @@
-.worker-body {
+/*
+ * style_dashboard.css — Panel del Trabajador
+ * ============================================
+ * Diseño limpio y moderno con topbar fijo.
+ * Mismas variables CSS que style.css para coherencia.
+ */
+
+/* ── RESET Y VARIABLES ───────────────────────────────────────────── */
+*, *::before, *::after {
+    box-sizing: border-box;
     margin: 0;
     padding: 0;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background-color: #f4f7f6; 
-    color: #333333; 
+}
+
+:root {
+    --verde-primario  : #00CC99;
+    --verde-oscuro    : #00a87f;
+    --fondo-app       : #f1f5f9;
+    --superficie      : #ffffff;
+    --texto-primario  : #0f172a;
+    --texto-secundario: #64748b;
+    --texto-suave     : #94a3b8;
+    --borde           : #e2e8f0;
+    --sombra-sm       : 0 1px 3px rgba(0,0,0,0.06);
+    --sombra-md       : 0 4px 12px rgba(0,0,0,0.07);
+    --fuente          : 'Inter', 'Segoe UI', sans-serif;
+    --radio           : 12px;
+}
+
+body {
+    font-family: var(--fuente);
+    background: var(--fondo-app);
+    color: var(--texto-primario);
     min-height: 100vh;
     display: flex;
     flex-direction: column;
 }
 
-.worker-header {
+/* ══════════════════════════════════════════════════════════════════
+   TOPBAR
+══════════════════════════════════════════════════════════════════ */
+
+/*
+ * Barra superior fija.
+ * Está dividida en tres zonas:
+ *   - .topbar-brand   : logo + nombre
+ *   - .topbar-saludo  : saludo personalizado + fecha (crece con flex:1)
+ *   - .topbar-acciones: badge de turno + botón salir
+ */
+.worker-topbar {
+    height: 64px;
+    background: var(--superficie);
+    border-bottom: 1px solid var(--borde);
     display: flex;
-    justify-content: space-between;
     align-items: center;
-    padding: 15px 5%;
-    background-color: #ffffff;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05); 
+    gap: 20px;
+    padding: 0 28px;
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    box-shadow: var(--sombra-sm);
 }
 
-.user-info {
+/* Logo en la barra superior */
+.topbar-brand {
     display: flex;
     align-items: center;
-    gap: 15px;
+    gap: 10px;
+    text-decoration: none;
+    flex-shrink: 0;
 }
 
-.user-avatar {
-    font-size: 3rem;
-    color: #2c3e50; 
+.topbar-logo {
+    width: 34px;
+    height: 34px;
+    background: var(--verde-primario);
+    border-radius: 9px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 0.9rem;
+    box-shadow: 0 0 12px rgba(0,204,153,0.4);
 }
 
-.user-info h2 { margin: 0; font-size: 1.2rem; font-weight: 600; color: #2c3e50; }
-.user-info p { margin: 0; font-size: 0.9rem; color: #7f8c8d; }
+.topbar-nombre-app {
+    font-size: 1rem;
+    font-weight: 800;
+    color: var(--texto-primario);
+    letter-spacing: 1px;
+}
 
-.btn-logout {
-    background: transparent;
-    border: 1px solid #e74c3c;
-    color: #e74c3c;
-    padding: 8px 15px;
-    border-radius: 6px;
+/* Zona central: saludo */
+.topbar-saludo {
+    flex: 1;
+    padding-left: 8px;
+    border-left: 1px solid var(--borde);
+}
+
+.saludo-texto {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--texto-primario);
+}
+
+.saludo-fecha {
+    font-size: 0.78rem;
+    color: var(--texto-secundario);
+    text-transform: capitalize;
+}
+
+/* Zona derecha: turno + salir */
+.topbar-acciones {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+/* Badge del turno (mañana / tarde / noche) */
+.turno-badge {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 14px;
+    background: rgba(0,204,153,0.1);
+    color: var(--verde-oscuro);
+    border-radius: 20px;
+    font-size: 0.8rem;
     font-weight: 600;
+    border: 1px solid rgba(0,204,153,0.25);
+}
+
+.btn-salir {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    padding: 8px 16px;
+    background: none;
+    border: 1.5px solid #fca5a5;
+    color: #ef4444;
+    border-radius: 9px;
+    font-size: 0.82rem;
+    font-weight: 600;
+    font-family: var(--fuente);
     cursor: pointer;
-    transition: 0.3s;
+    transition: background 0.15s, color 0.15s;
 }
 
-.btn-logout:hover { 
-    background: #e74c3c; 
-    color: white; 
+.btn-salir:hover {
+    background: #fef2f2;
 }
 
+/* ══════════════════════════════════════════════════════════════════
+   CONTENIDO PRINCIPAL
+══════════════════════════════════════════════════════════════════ */
 
-.worker-dashboard {
-    padding: 30px 5%;
+.worker-main {
+    flex: 1;
+    padding: 28px 32px;
     display: flex;
     flex-direction: column;
-    gap: 25px;
-    max-width: 900px; 
+    gap: 20px;
+    max-width: 1100px;
     margin: 0 auto;
-    width: 90%;
+    width: 100%;
 }
 
+/* ══════════════════════════════════════════════════════════════════
+   TARJETA DE FICHAJE
+══════════════════════════════════════════════════════════════════ */
 
-.card {
-    background-color: #ffffff;
-    border-radius: 12px;
-    padding: 25px;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.03); 
-    border: 1px solid #eaeaea; 
+/*
+ * Tarjeta central del reloj y control de fichaje.
+ * Usa un gradiente oscuro para destacar sobre el fondo claro.
+ */
+.fichar-card {
+    background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+    border-radius: 16px;
+    padding: 32px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    box-shadow: 0 8px 32px rgba(15,23,42,0.25);
+    position: relative;
+    overflow: hidden;
 }
 
-.card h3 {
-    margin-top: 0;
-    color: #2c3e50;
-    font-weight: 600;
-    font-size: 1.3rem;
-    border-bottom: 2px solid #f4f7f6;
-    padding-bottom: 10px;
+/* Decoración: círculo verde difuminado en el fondo */
+.fichar-card::before {
+    content: '';
+    position: absolute;
+    width: 300px;
+    height: 300px;
+    background: radial-gradient(circle, rgba(0,204,153,0.12) 0%, transparent 70%);
+    top: -80px;
+    right: -60px;
+    pointer-events: none;
+}
+
+/* Reloj digital */
+.reloj-wrapper {
+    display: flex;
+    align-items: baseline;
+    gap: 0;
+    margin-bottom: 4px;
+}
+
+.reloj-hora {
+    font-size: 4.5rem;
+    font-weight: 800;
+    color: white;
+    line-height: 1;
+    letter-spacing: -2px;
+}
+
+/* Segundos en color más tenue y más pequeños */
+.reloj-segundo {
+    font-size: 2rem;
+    font-weight: 300;
+    color: rgba(255,255,255,0.45);
+    margin-bottom: 2px;
+}
+
+/* Fecha debajo del reloj */
+.reloj-fecha {
+    font-size: 0.85rem;
+    color: rgba(255,255,255,0.5);
+    text-transform: capitalize;
     margin-bottom: 20px;
 }
 
-/* --- TARJETA DE FICHAR --- */
-.clock-in-card {
-    text-align: center;
+/* Indicador de estado del fichaje */
+.fichar-estado {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 20px;
+    font-size: 0.875rem;
+    color: rgba(255,255,255,0.7);
 }
 
-#current-time {
-    font-size: 4rem;
-    font-weight: bold;
-    color: #2c3e50;
-    margin: 10px 0 25px 0;
-    letter-spacing: -1px;
+/* Punto de estado (verde = fichado, gris = sin fichar) */
+.estado-punto {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
 }
 
-.btn-action {
-    background-color: #00CC99; 
+.estado-sin-fichar { background: rgba(255,255,255,0.3); }
+.estado-fichado    {
+    background: var(--verde-primario);
+    box-shadow: 0 0 8px rgba(0,204,153,0.6);
+    /* Animación de pulso para indicar que está activo */
+    animation: pulso 2s infinite;
+}
+
+@keyframes pulso {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(0,204,153,0.5); }
+    50%       { box-shadow: 0 0 0 6px rgba(0,204,153,0); }
+}
+
+/* Botón principal de fichaje */
+.btn-fichar {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 16px 48px;
+    background: var(--verde-primario);
     color: white;
     border: none;
-    padding: 18px 40px;
-    font-size: 1.2rem;
-    font-weight: bold;
-    border-radius: 50px;
+    border-radius: 50px;    /* Cápsula */
+    font-size: 1rem;
+    font-weight: 700;
+    font-family: var(--fuente);
+    letter-spacing: 1px;
     cursor: pointer;
-    box-shadow: 0 4px 15px rgba(0, 204, 153, 0.3);
-    transition: all 0.3s;
+    transition: background 0.2s, transform 0.15s, box-shadow 0.2s;
+    box-shadow: 0 6px 20px rgba(0,204,153,0.4);
+}
+
+.btn-fichar:hover {
+    background: var(--verde-oscuro);
+    transform: translateY(-1px);
+    box-shadow: 0 8px 25px rgba(0,204,153,0.55);
+}
+
+.btn-fichar:active {
+    transform: translateY(0);
+}
+
+/* Estado de SALIDA: botón rojo */
+.btn-fichar-salida {
+    background: #ef4444 !important;
+    box-shadow: 0 6px 20px rgba(239,68,68,0.35) !important;
+}
+
+.btn-fichar-salida:hover {
+    background: #dc2626 !important;
+}
+
+/* Historial de fichajes del día */
+.fichar-registro {
+    margin-top: 16px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
     width: 100%;
-    max-width: 350px;
 }
 
-.btn-action:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(0, 204, 153, 0.4);
-    background-color: #00b386;
+.registro-titulo {
+    font-size: 0.73rem;
+    color: rgba(255,255,255,0.4);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 4px;
 }
 
+.registro-item {
+    font-size: 0.78rem;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-weight: 500;
+}
 
-.secondary-cards {
+.registro-entrada { background: rgba(0,204,153,0.15); color: var(--verde-primario); }
+.registro-salida  { background: rgba(239,68,68,0.15);  color: #f87171; }
+
+/* ══════════════════════════════════════════════════════════════════
+   FILA DE ESTADÍSTICAS
+══════════════════════════════════════════════════════════════════ */
+
+.stats-row {
     display: grid;
-    grid-template-columns: 1fr;
-    gap: 20px;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
 }
 
-@media (min-width: 768px) {
-    .secondary-cards { grid-template-columns: 1fr 1fr; }
+.stat-item {
+    background: var(--superficie);
+    border-radius: var(--radio);
+    padding: 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    box-shadow: var(--sombra-sm);
 }
 
-/* Lista de Tareas */
-.card-header {
+.stat-icono {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1rem;
+    flex-shrink: 0;
+}
+
+.stat-verde      { background: #f0fdf4; color: #16a34a; }
+.stat-naranja    { background: #fffbeb; color: #d97706; }
+.stat-azul       { background: #eff6ff; color: #2563eb; }
+.stat-azul-medio { background: #e0f2fe; color: #0284c7; }
+
+.stat-valor {
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: var(--texto-primario);
+    line-height: 1;
+    margin-bottom: 2px;
+}
+
+.stat-label {
+    font-size: 0.72rem;
+    color: var(--texto-secundario);
+    font-weight: 500;
+}
+
+/* ══════════════════════════════════════════════════════════════════
+   GRID INFERIOR
+══════════════════════════════════════════════════════════════════ */
+
+.content-grid {
+    display: grid;
+    grid-template-columns: 1fr 300px;
+    gap: 16px;
+    align-items: start;
+}
+
+/* Panel derecho apilado en columna */
+.panel-lateral {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+/* ── TARJETA GENÉRICA DE PANEL ──────────────────────────────────── */
+.panel-card {
+    background: var(--superficie);
+    border-radius: var(--radio);
+    box-shadow: var(--sombra-sm);
+    overflow: hidden;
+}
+
+.panel-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 15px;
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--borde);
 }
 
-.card-header h3 {
-    border-bottom: none;
-    margin-bottom: 0;
-    padding-bottom: 0;
-}
-
-.badge {
-    background: #fff3cd; 
-    color: #856404;
-    padding: 5px 12px;
-    border-radius: 20px;
-    font-size: 0.85rem;
-    font-weight: bold;
-}
-
-.task-list {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-}
-
-.task-list li {
-    background: #f8f9fa;
-    padding: 15px;
-    margin-bottom: 10px;
-    border-radius: 8px;
+.panel-header h3 {
+    font-size: 0.875rem;
+    font-weight: 700;
+    color: var(--texto-primario);
     display: flex;
     align-items: center;
-    gap: 15px;
-    border-left: 4px solid #00CC99; 
-    transition: 0.2s;
+    gap: 8px;
 }
 
-.task-list li:hover { background: #f1f3f5; }
-.task-list input[type="checkbox"] { transform: scale(1.3); cursor: pointer; accent-color: #00CC99; }
-.task-list label { cursor: pointer; font-size: 1.05rem; flex: 1; color: #495057; }
+.panel-header h3 i {
+    color: var(--verde-primario);
+}
 
-/* Botón outline (Stock) */
-.btn-outline {
-    background: transparent;
-    border: 2px solid #2c3e50;
-    color: #2c3e50;
-    padding: 12px 20px;
-    border-radius: 8px;
-    font-weight: bold;
+/* Badge contador en la cabecera */
+.badge-contador {
+    font-size: 0.72rem;
+    font-weight: 600;
+    background: rgba(245,158,11,0.12);
+    color: #d97706;
+    padding: 3px 10px;
+    border-radius: 20px;
+}
+
+/* ── LISTA DE TAREAS ────────────────────────────────────────────── */
+.tareas-lista {
+    list-style: none;
+    padding: 8px 0;
+}
+
+.tarea-item {
+    padding: 14px 20px;
+    border-bottom: 1px solid var(--borde);
+    transition: background 0.15s;
+}
+
+.tarea-item:last-child { border-bottom: none; }
+.tarea-item:hover      { background: var(--fondo-app); }
+
+/* Tarea completada: texto tachado y opacidad reducida */
+.tarea-completada {
+    opacity: 0.55;
+}
+
+.tarea-completada .tarea-titulo {
+    text-decoration: line-through;
+}
+
+.tarea-cuerpo {
+    display: flex;
+    gap: 14px;
+    align-items: flex-start;
+}
+
+/*
+ * Botón circular que indica el estado.
+ * Al pulsarlo llama a cambiarEstado(id) en JS.
+ * Cambia de color según el estado actual.
+ */
+.tarea-estado-btn {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    border: none;
     cursor: pointer;
-    width: 100%;
-    margin-top: 15px;
-    transition: 0.3s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.85rem;
+    flex-shrink: 0;
+    margin-top: 2px;
+    transition: transform 0.15s;
 }
 
-.btn-outline:hover {
-    background: #2c3e50;
+.tarea-estado-btn:hover { transform: scale(1.15); }
+
+.estado-pendiente   { background: #fffbeb; color: #f59e0b; }
+.estado-en-progreso { background: #eff6ff; color: #3b82f6; }
+.estado-completada  { background: #f0fdf4; color: #22c55e; }
+
+.tarea-info { flex: 1; }
+
+.tarea-titulo {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--texto-primario);
+    margin-bottom: 3px;
+}
+
+.tarea-desc {
+    font-size: 0.78rem;
+    color: var(--texto-secundario);
+    margin-bottom: 8px;
+    line-height: 1.4;
+}
+
+/* Meta: fecha + badge de estado */
+.tarea-meta {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.tarea-meta span {
+    font-size: 0.72rem;
+    color: var(--texto-suave);
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+/* Badges de estado de tarea */
+.tarea-badge {
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 0.68rem;
+    font-weight: 700;
+}
+
+.badge-pendiente    { background: #fffbeb; color: #b45309; }
+.badge-en-progreso  { background: #eff6ff; color: #1d4ed8; }
+.badge-completada   { background: #f0fdf4; color: #166534; }
+
+/* Botón añadir nueva tarea */
+.btn-nueva-tarea {
+    width: 100%;
+    padding: 13px;
+    background: none;
+    border: 2px dashed var(--borde);
+    border-radius: 0 0 var(--radio) var(--radio);
+    color: var(--texto-secundario);
+    font-size: 0.875rem;
+    font-weight: 600;
+    font-family: var(--fuente);
+    cursor: pointer;
+    transition: border-color 0.2s, color 0.2s, background 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.btn-nueva-tarea:hover {
+    border-color: var(--verde-primario);
+    color: var(--verde-primario);
+    background: rgba(0,204,153,0.04);
+}
+
+/* ── BUSCADOR DE STOCK ──────────────────────────────────────────── */
+.busqueda-stock {
+    padding: 14px 16px;
+}
+
+.busqueda-input-wrapper {
+    position: relative;
+    margin-bottom: 8px;
+}
+
+.busqueda-icono {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--texto-suave);
+    font-size: 0.82rem;
+}
+
+.busqueda-stock input {
+    width: 100%;
+    padding: 10px 12px 10px 34px;
+    border: 1.5px solid var(--borde);
+    border-radius: 9px;
+    font-size: 0.875rem;
+    font-family: var(--fuente);
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.busqueda-stock input:focus {
+    border-color: var(--verde-primario);
+    box-shadow: 0 0 0 3px rgba(0,204,153,0.1);
+}
+
+/* Resultados de búsqueda */
+.busqueda-resultados {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.resultado-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 10px;
+    background: var(--fondo-app);
+    border-radius: 8px;
+    gap: 8px;
+}
+
+.resultado-nombre {
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: var(--texto-primario);
+    margin-bottom: 2px;
+}
+
+.resultado-ref {
+    font-size: 0.72rem;
+    color: var(--texto-secundario);
+}
+
+.busqueda-vacio {
+    font-size: 0.8rem;
+    color: var(--texto-suave);
+    text-align: center;
+    padding: 10px;
+}
+
+/* ── INFORMACIÓN DE TURNO ───────────────────────────────────────── */
+.turno-info {
+    padding: 14px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.turno-fila {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--borde);
+}
+
+.turno-fila:last-child { border-bottom: none; padding-bottom: 0; }
+
+.turno-clave {
+    font-size: 0.8rem;
+    color: var(--texto-secundario);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.turno-clave i { color: var(--verde-primario); }
+
+.turno-val {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--texto-primario);
+}
+
+/* ── BADGES GENÉRICOS ───────────────────────────────────────────── */
+.badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 3px 9px;
+    border-radius: 20px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+.badge-ok      { background: #f0fdf4; color: #166534; }
+.badge-aviso   { background: #fffbeb; color: #b45309; }
+.badge-peligro { background: #fef2f2; color: #b91c1c; }
+
+/* ══════════════════════════════════════════════════════════════════
+   MODAL
+══════════════════════════════════════════════════════════════════ */
+
+/*
+ * El overlay oscuro y el modal empiezan ocultos.
+ * La clase .modal-visible los hace aparecer con transición.
+ */
+.modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(15,23,42,0.5);
+    z-index: 100;
+    backdrop-filter: blur(4px);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.25s;
+}
+
+.modal-overlay.modal-visible {
+    opacity: 1;
+    pointer-events: all;
+}
+
+.modal {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -44%);  /* Ligeramente arriba del centro */
+    background: var(--superficie);
+    border-radius: 16px;
+    width: 90%;
+    max-width: 460px;
+    z-index: 101;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.25s, transform 0.25s;
+}
+
+/* Al activarse, el modal baja a la posición central */
+.modal.modal-visible {
+    opacity: 1;
+    pointer-events: all;
+    transform: translate(-50%, -50%);
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 24px;
+    border-bottom: 1px solid var(--borde);
+}
+
+.modal-header h3 {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--texto-primario);
+}
+
+.modal-cerrar {
+    background: none;
+    border: none;
+    font-size: 1rem;
+    color: var(--texto-suave);
+    cursor: pointer;
+    padding: 4px 8px;
+    border-radius: 6px;
+    transition: background 0.15s;
+}
+
+.modal-cerrar:hover { background: var(--fondo-app); color: var(--texto-primario); }
+
+.modal-body {
+    padding: 20px 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+/* Campos del modal */
+.modal-campo label {
+    display: block;
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: #374151;
+    margin-bottom: 6px;
+}
+
+.modal-campo input,
+.modal-campo textarea,
+.modal-campo select {
+    width: 100%;
+    padding: 10px 14px;
+    border: 1.5px solid var(--borde);
+    border-radius: 9px;
+    font-size: 0.875rem;
+    font-family: var(--fuente);
+    color: var(--texto-primario);
+    background: var(--fondo-app);
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    resize: vertical;
+}
+
+.modal-campo input:focus,
+.modal-campo textarea:focus,
+.modal-campo select:focus {
+    border-color: var(--verde-primario);
+    box-shadow: 0 0 0 3px rgba(0,204,153,0.1);
+    background: var(--superficie);
+}
+
+.modal-error {
+    display: block;
+    font-size: 0.75rem;
+    color: #ef4444;
+    margin-top: 4px;
+}
+
+.modal-footer {
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
+    padding: 16px 24px;
+    border-top: 1px solid var(--borde);
+}
+
+.btn-modal-cancelar {
+    padding: 10px 20px;
+    background: none;
+    border: 1.5px solid var(--borde);
+    border-radius: 9px;
+    color: var(--texto-secundario);
+    font-size: 0.875rem;
+    font-family: var(--fuente);
+    cursor: pointer;
+    font-weight: 600;
+    transition: background 0.15s;
+}
+
+.btn-modal-cancelar:hover { background: var(--fondo-app); }
+
+.btn-modal-guardar {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    padding: 10px 22px;
+    background: var(--verde-primario);
     color: white;
+    border: none;
+    border-radius: 9px;
+    font-size: 0.875rem;
+    font-weight: 700;
+    font-family: var(--fuente);
+    cursor: pointer;
+    transition: background 0.15s, transform 0.1s;
+    box-shadow: 0 3px 10px rgba(0,204,153,0.3);
+}
+
+.btn-modal-guardar:hover {
+    background: var(--verde-oscuro);
+    transform: translateY(-1px);
+}
+
+/* ══════════════════════════════════════════════════════════════════
+   RESPONSIVE
+══════════════════════════════════════════════════════════════════ */
+
+@media (max-width: 960px) {
+    .content-grid { grid-template-columns: 1fr; }
+    .panel-lateral { display: none; }
+    .stats-row     { grid-template-columns: repeat(2, 1fr); }
+    .worker-main   { padding: 20px 16px; }
+}
+
+@media (max-width: 600px) {
+    .stats-row          { grid-template-columns: repeat(2, 1fr); }
+    .worker-topbar      { padding: 0 16px; gap: 12px; }
+    .turno-badge        { display: none; }
+    .topbar-nombre-app  { display: none; }
+    .reloj-hora         { font-size: 3.5rem; }
 }

@@ -3,81 +3,651 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DI-PYMES | Dashboard Gerente</title>
+    <title>DI-PYMES | Panel Gerente</title>
+    <!-- Tipografía Inter de Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Iconos de Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Hoja de estilos del panel del gerente -->
     <link rel="stylesheet" href="style.css">
 </head>
-<body>
 
-    <div class="sidebar">
-        <h2>DI-PYMES</h2>
-        <div class="menu-item active">📊 Dashboard General</div>
-        <div class="menu-item">📦 Gestión de Stock</div>
-        <div class="menu-item">✅ Tareas de Equipo</div>
-        <div class="menu-item">👥 Trabajadores</div>
-        <div class="menu-item" style="margin-top: 50px;">🚪 Cerrar Sesión</div>
+<!--
+ ================================================================
+   ARQUITECTURA: SPA (Single Page Application)
+   ─────────────────────────────────────────────────────────────
+   Todas las secciones del panel viven en este único archivo HTML.
+   La navegación entre secciones NO recarga la página, la gestiona
+   JavaScript puro con la función navegarA(pagina).
+
+   Cómo funciona la navegación:
+     - Cada sección tiene id="section-{nombre}" y class="page-section"
+     - navegarA() muestra la sección pedida y oculta el resto (display:none)
+     - El ítem del sidebar activo tiene la clase "active"
+
+   Secciones del panel:
+     1. section-dashboard    → KPIs generales, inventario crítico, actividad
+     2. section-stock        → CRUD completo de productos del catálogo
+     3. section-tareas       → CRUD de tareas asignadas al equipo
+     4. section-trabajadores → CRUD de empleados
+     5. section-finanzas     → resumen financiero y tabla de pedidos
+ ================================================================
+-->
+<body class="has-sidebar">
+
+<!-- ═══════════════════════════════════════════════════════════════
+     SIDEBAR — Menú de navegación lateral fijo
+     ─────────────────────────────────────────────────────────────
+     Siempre visible en escritorio. En móvil se oculta y aparece
+     al pulsar el botón hamburguesa del topbar.
+     toggleSidebar() en gerente.js controla esto con una clase CSS.
+═══════════════════════════════════════════════════════════════ -->
+<aside class="sidebar" id="sidebar">
+
+    <!-- Logo y nombre de la aplicación en el sidebar -->
+    <div class="sidebar-brand">
+        <div class="sidebar-logo"><i class="fas fa-building"></i></div>
+        <span class="sidebar-title">DI-PYMES</span>
     </div>
 
-    <div class="main-content">
-        
-        <div class="header">
-            <h1>Visión General del Negocio</h1>
-            <div>👤 <strong>Perfil:</strong> Gerente</div>
+    <!--
+      Bloque de perfil del usuario logueado.
+      El JS (gerente.js) rellena estos elementos con los datos
+      guardados en sessionStorage al hacer login.
+    -->
+    <div class="sidebar-perfil">
+        <div class="sidebar-avatar"><span id="avatarIniciales">G</span></div>
+        <div class="sidebar-info">
+            <p class="sidebar-nombre" id="sidebarNombre">Gerente</p>
+            <p class="sidebar-email"  id="sidebarEmail">gerente@dipymes.com</p>
         </div>
-
-        <div class="cards-container">
-            <div class="card" style="border-left-color: #2196F3;">
-                <h3>Ingresos Mensuales</h3>
-                <p class="value">€ 14,350.00</p>
-            </div>
-            <div class="card" style="border-left-color: #FF9800;">
-                <h3>Tareas Pendientes</h3>
-                <p class="value">8</p>
-            </div>
-            <div class="card" style="border-left-color: #F44336;">
-                <h3>Alertas de Stock Mínimo</h3>
-                <p class="value">3 Productos</p>
-            </div>
-        </div>
-
-        <div class="table-section">
-            <h3>Atención Requerida: Inventario</h3>
-            <table>
-                <thead>
-                    <tr>
-                        <th>ID Producto</th>
-                        <th>Nombre</th>
-                        <th>Proveedor</th>
-                        <th>Stock Actual</th>
-                        <th>Estado</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td>PROD-042</td>
-                        <td>Cable Cobre 2.5mm (Rollo)</td>
-                        <td>Suministros Elect SL</td>
-                        <td>5</td>
-                        <td><span class="badge badge-warning">Bajo Stock</span></td>
-                    </tr>
-                    <tr>
-                        <td>PROD-089</td>
-                        <td>Interruptor Simple Blanco</td>
-                        <td>Distribuciones Martín</td>
-                        <td>120</td>
-                        <td><span class="badge badge-success">Óptimo</span></td>
-                    </tr>
-                    <tr>
-                        <td>PROD-105</td>
-                        <td>Tubo Corrugado 20mm</td>
-                        <td>Suministros Elect SL</td>
-                        <td>0</td>
-                        <td><span class="badge badge-warning" style="background-color: #f8d7da; color: #721c24;">Agotado</span></td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
-
     </div>
 
+    <!-- Etiqueta de sección del menú -->
+    <p class="sidebar-seccion-label">MENÚ PRINCIPAL</p>
+
+    <!--
+      Navegación principal del sidebar.
+      Cada enlace llama a navegarA(pagina, this) al hacer clic.
+      'this' pasa el propio elemento para que se le añada la clase 'active'.
+
+      Los badges numéricos (badgeStockNav, badgeTareasNav) se actualizan
+      automáticamente con actualizarBadgesNav() cuando cambian los datos.
+    -->
+    <nav class="sidebar-nav">
+        <!-- Dashboard: sección activa por defecto al cargar la página -->
+        <a class="nav-item active" data-pagina="dashboard" onclick="navegarA('dashboard',this)">
+            <i class="fas fa-chart-pie nav-icono"></i><span>Dashboard General</span>
+        </a>
+        <!-- Stock: badge rojo con el número de productos con alertas -->
+        <a class="nav-item" data-pagina="stock" onclick="navegarA('stock',this)">
+            <i class="fas fa-boxes nav-icono"></i><span>Gestión de Stock</span>
+            <span class="nav-badge nav-badge-peligro" id="badgeStockNav">0</span>
+        </a>
+        <!-- Tareas: badge amarillo con el número de tareas no completadas -->
+        <a class="nav-item" data-pagina="tareas" onclick="navegarA('tareas',this)">
+            <i class="fas fa-clipboard-check nav-icono"></i><span>Tareas del Equipo</span>
+            <span class="nav-badge nav-badge-aviso" id="badgeTareasNav">0</span>
+        </a>
+        <!-- Trabajadores: sin badge (solo listado) -->
+        <a class="nav-item" data-pagina="trabajadores" onclick="navegarA('trabajadores',this)">
+            <i class="fas fa-users nav-icono"></i><span>Trabajadores</span>
+        </a>
+        <!-- Finanzas: sin badge -->
+        <a class="nav-item" data-pagina="finanzas" onclick="navegarA('finanzas',this)">
+            <i class="fas fa-euro-sign nav-icono"></i><span>Información Financiera</span>
+        </a>
+    </nav>
+
+    <!-- Botón de cerrar sesión al pie del sidebar -->
+    <button class="btn-logout" onclick="cerrarSesion()">
+        <i class="fas fa-sign-out-alt"></i><span>Cerrar Sesión</span>
+    </button>
+</aside>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     CUERPO PRINCIPAL — Todo lo que va a la derecha del sidebar
+═══════════════════════════════════════════════════════════════ -->
+<div class="app-body">
+
+    <!-- ── TOPBAR ──────────────────────────────────────────────────
+         Barra superior fija con: hamburguesa (móvil), buscador global,
+         campana de notificaciones y avatar del gerente.
+    ───────────────────────────────────────────────────────────── -->
+    <header class="topbar">
+        <!-- Botón hamburguesa: solo visible en móvil, abre/cierra el sidebar -->
+        <button class="btn-hamburguesa" onclick="toggleSidebar()"><i class="fas fa-bars"></i></button>
+
+        <!-- Buscador global: busca en productos y navega automáticamente a la sección de stock -->
+        <div class="topbar-busqueda">
+            <i class="fas fa-search topbar-busqueda-icono"></i>
+            <input type="text" id="topbarBusqueda" placeholder="Buscar productos, tareas, trabajadores..." oninput="busquedaGlobal(this.value)">
+        </div>
+
+        <!-- Acciones del lado derecho del topbar -->
+        <div class="topbar-acciones">
+            <!-- Panel de notificaciones (se abre/cierra con toggleNotificaciones) -->
+            <div class="notif-wrapper">
+                <!-- Botón campana: el punto rojo aparece cuando hay notificaciones sin leer -->
+                <button class="btn-icono" onclick="toggleNotificaciones()" title="Notificaciones">
+                    <i class="fas fa-bell"></i>
+                    <!-- Punto rojo: el JS lo muestra u oculta según haya notificaciones sin leer -->
+                    <span class="notif-dot" id="notifDot"></span>
+                </button>
+                <!-- Panel desplegable de notificaciones -->
+                <div class="notif-panel" id="notifPanel">
+                    <div class="notif-header">
+                        <strong>Notificaciones</strong>
+                        <!-- Botón para marcar todas como leídas de una vez -->
+                        <button class="btn-link" onclick="marcarTodoLeido()">Marcar todo leído</button>
+                    </div>
+                    <!-- Las notificaciones se generan aquí con renderNotificaciones() -->
+                    <div class="notif-lista" id="notifLista"></div>
+                </div>
+            </div>
+
+            <!-- Avatar e información del gerente logueado -->
+            <div class="topbar-perfil">
+                <!-- Avatar con las iniciales del nombre del gerente -->
+                <div class="topbar-avatar" id="topbarAvatar">G</div>
+                <span id="topbarNombre">Gerente</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- ── CONTENIDO DE LAS SECCIONES ─────────────────────────────
+         Área principal donde se muestran las secciones del panel.
+    ───────────────────────────────────────────────────────────── -->
+    <main class="page-content">
+
+        <!-- Cabecera dinámica: título y subtítulo cambian con cada sección -->
+        <!-- El botón de acción principal también aparece/desaparece según la sección -->
+        <div class="page-header">
+            <div>
+                <!-- Título y subtítulo se actualizan en navegarA() -->
+                <h1 class="page-titulo"    id="pageTitulo">Visión General del Negocio</h1>
+                <p  class="page-subtitulo" id="pageSubtitulo">Resumen en tiempo real</p>
+            </div>
+            <!--
+              Botón de acción principal (+ Nuevo Producto, + Nueva Tarea, etc.)
+              Solo aparece en las secciones que tienen formulario de creación.
+              El texto cambia según la sección con navegarA().
+              Al pulsarlo llama a accionPrincipal() que abre el modal correcto.
+            -->
+            <button class="btn-accion-principal" id="btnAccionPrincipal" style="display:none" onclick="accionPrincipal()">
+                <i class="fas fa-plus" id="iconoAccion"></i>
+                <span id="textoAccion">Añadir</span>
+            </button>
+        </div>
+
+        <!-- ══════════════════════════════════════════════════════════
+             SECCIÓN 1: DASHBOARD GENERAL
+             Visible por defecto al cargar la página.
+             Muestra los KPIs principales, el inventario crítico y la actividad.
+        ══════════════════════════════════════════════════════════ -->
+        <div id="section-dashboard" class="page-section">
+
+            <!-- ── KPIs: 4 tarjetas con las métricas más importantes ── -->
+            <!-- Los valores se actualizan con renderDashboard() y se animan con animarContadores() -->
+            <div class="kpi-grid">
+                <!-- KPI Ingresos del mes (valor fijo en esta versión) -->
+                <div class="kpi-card kpi-azul">
+                    <div class="kpi-icono-wrapper"><i class="fas fa-euro-sign"></i></div>
+                    <div class="kpi-datos">
+                        <p class="kpi-etiqueta">Ingresos del Mes</p>
+                        <!-- data-valor: el JS lee este valor para la animación countup -->
+                        <p class="kpi-valor" data-valor="14350" data-prefijo="€ ">€ 0</p>
+                        <p class="kpi-tendencia tendencia-positiva"><i class="fas fa-arrow-trend-up"></i> +12% vs mes anterior</p>
+                    </div>
+                </div>
+                <!-- KPI Tareas pendientes (se actualiza desde el array de tareas) -->
+                <div class="kpi-card kpi-naranja">
+                    <div class="kpi-icono-wrapper"><i class="fas fa-clock"></i></div>
+                    <div class="kpi-datos">
+                        <p class="kpi-etiqueta">Tareas Pendientes</p>
+                        <p class="kpi-valor" id="kpiTareasPend" data-valor="0" data-prefijo="">0</p>
+                        <p class="kpi-tendencia tendencia-negativa"><i class="fas fa-arrow-trend-down"></i> -3 respecto a ayer</p>
+                    </div>
+                </div>
+                <!-- KPI Alertas de stock (productos con stock bajo o agotado) -->
+                <div class="kpi-card kpi-rojo">
+                    <div class="kpi-icono-wrapper"><i class="fas fa-exclamation-triangle"></i></div>
+                    <div class="kpi-datos">
+                        <p class="kpi-etiqueta">Alertas de Stock</p>
+                        <p class="kpi-valor" id="kpiAlertas" data-valor="0" data-prefijo="">0</p>
+                        <p class="kpi-tendencia tendencia-negativa"><i class="fas fa-circle-xmark"></i> Requieren atención</p>
+                    </div>
+                </div>
+                <!-- KPI Pedidos del mes (total de pedidos cargados de la API) -->
+                <div class="kpi-card kpi-verde">
+                    <div class="kpi-icono-wrapper"><i class="fas fa-shopping-cart"></i></div>
+                    <div class="kpi-datos">
+                        <p class="kpi-etiqueta">Pedidos Este Mes</p>
+                        <p class="kpi-valor" id="kpiPedidos" data-valor="0" data-prefijo="">0</p>
+                        <p class="kpi-tendencia tendencia-positiva"><i class="fas fa-arrow-trend-up"></i> +5 esta semana</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ── Fila inferior: tabla de inventario crítico + actividad reciente ── -->
+            <div class="bottom-grid">
+                <!-- Tabla con los productos que tienen stock bajo o agotado -->
+                <div class="panel-card panel-inventario">
+                    <div class="panel-card-header">
+                        <h3><i class="fas fa-warehouse"></i> Inventario — Atención Requerida</h3>
+                        <!-- Enlace rápido a la sección de stock completo -->
+                        <button class="btn-ver-todo" onclick="navegarA('stock', document.querySelector('[data-pagina=stock]'))">
+                            Ver todo <i class="fas fa-arrow-right"></i>
+                        </button>
+                    </div>
+                    <div class="tabla-wrapper">
+                        <table>
+                            <thead><tr><th>Ref.</th><th>Producto</th><th>Proveedor</th><th>Stock</th><th>Estado</th></tr></thead>
+                            <!-- Las filas las genera renderDashboard() en el JS -->
+                            <tbody id="tablaInventarioBody"></tbody>
+                        </table>
+                    </div>
+                </div>
+                <!-- Lista de eventos recientes del negocio (datos locales, no de la BD) -->
+                <div class="panel-card panel-actividad">
+                    <div class="panel-card-header"><h3><i class="fas fa-bolt"></i> Actividad Reciente</h3></div>
+                    <!-- El JS genera la lista de actividad aquí -->
+                    <ul class="actividad-lista" id="actividadLista"></ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- ══════════════════════════════════════════════════════════
+             SECCIÓN 2: GESTIÓN DE STOCK
+             Oculta por defecto, se muestra al navegar a 'stock'.
+             Tiene barra de filtros y tabla completa de productos con CRUD.
+        ══════════════════════════════════════════════════════════ -->
+        <div id="section-stock" class="page-section" style="display:none">
+
+            <!-- Barra de filtros: buscador de texto + botones de filtro por estado de stock -->
+            <div class="filtros-bar">
+                <!-- Buscador de productos (busca en nombre, referencia y proveedor) -->
+                <div class="filtros-busqueda">
+                    <i class="fas fa-search"></i>
+                    <!-- oninput actualiza la tabla al escribir sin necesitar pulsar Enter -->
+                    <input type="text" id="busquedaStock" placeholder="Buscar por nombre, referencia o proveedor..." oninput="renderStock()">
+                </div>
+                <!-- Botones de filtro por estado del stock -->
+                <div class="filtros-botones">
+                    <button class="filtro-btn activo" data-filtro="todos"    onclick="setFiltroStock('todos',this)">Todos</button>
+                    <button class="filtro-btn"         data-filtro="bajo"    onclick="setFiltroStock('bajo',this)">Bajo Stock</button>
+                    <button class="filtro-btn"         data-filtro="agotado" onclick="setFiltroStock('agotado',this)">Agotados</button>
+                </div>
+            </div>
+
+            <!-- Tabla de productos con todas las columnas -->
+            <div class="panel-card" style="margin-top:16px">
+                <div class="panel-card-header">
+                    <h3><i class="fas fa-box"></i> Catálogo de Productos</h3>
+                    <!-- Contador dinámico de productos visibles (cambia con los filtros) -->
+                    <span class="texto-gris" id="contadorProductos"></span>
+                </div>
+                <div class="tabla-wrapper">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Referencia</th>
+                                <th>Nombre</th>
+                                <th>Proveedor</th>
+                                <th>Precio</th>
+                                <th>Stock Actual</th>
+                                <th>Stock Mínimo</th>
+                                <th>Estado</th>
+                                <!-- Columna de acciones: botones editar y eliminar por fila -->
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <!-- Las filas las genera renderStock() en gerente.js -->
+                        <tbody id="tablaStockBody"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- ══════════════════════════════════════════════════════════
+             SECCIÓN 3: TAREAS DEL EQUIPO
+             Muestra las tareas en formato kanban (tarjetas en grid).
+             Permite filtrar por estado y cambiar el estado con un select.
+        ══════════════════════════════════════════════════════════ -->
+        <div id="section-tareas" class="page-section" style="display:none">
+
+            <!-- Barra de filtros por estado de tarea + contador -->
+            <div class="filtros-bar">
+                <div class="filtros-botones">
+                    <button class="filtro-btn activo" data-filtro="todas"       onclick="setFiltroTareas('todas',this)">Todas</button>
+                    <button class="filtro-btn"         data-filtro="PENDIENTE"  onclick="setFiltroTareas('PENDIENTE',this)">Pendiente</button>
+                    <button class="filtro-btn"         data-filtro="EN_PROGRESO"onclick="setFiltroTareas('EN_PROGRESO',this)">En Progreso</button>
+                    <button class="filtro-btn"         data-filtro="COMPLETADA" onclick="setFiltroTareas('COMPLETADA',this)">Completada</button>
+                </div>
+                <!-- Muestra cuántas tareas hay con el filtro aplicado -->
+                <span class="texto-gris" id="contadorTareas"></span>
+            </div>
+
+            <!-- Grid de tarjetas kanban: las genera renderTareasEquipo() en gerente.js -->
+            <!-- Cada tarjeta tiene: estado, título, descripción, trabajador asignado, fecha, select de estado y botones -->
+            <div class="tareas-equipo-grid" id="tareasEquipoGrid"></div>
+        </div>
+
+        <!-- ══════════════════════════════════════════════════════════
+             SECCIÓN 4: TRABAJADORES
+             Grid de tarjetas con información de cada empleado.
+             Permite crear, editar y desactivar trabajadores.
+        ══════════════════════════════════════════════════════════ -->
+        <div id="section-trabajadores" class="page-section" style="display:none">
+            <!-- Las tarjetas de trabajadores las genera renderTrabajadores() en gerente.js -->
+            <div class="trabajadores-grid" id="trabajadoresGrid"></div>
+        </div>
+
+        <!-- ══════════════════════════════════════════════════════════
+             SECCIÓN 5: INFORMACIÓN FINANCIERA
+             Muestra los KPIs financieros, la tabla de pedidos y el gráfico.
+        ══════════════════════════════════════════════════════════ -->
+        <div id="section-finanzas" class="page-section" style="display:none">
+
+            <!-- KPIs financieros: ingresos totales, nº pedidos, ticket medio, cancelados -->
+            <div class="kpi-grid" style="margin-bottom:20px">
+                <!-- Ingresos totales (suma de pedidos entregados) -->
+                <div class="kpi-card kpi-verde">
+                    <div class="kpi-icono-wrapper"><i class="fas fa-arrow-trend-up"></i></div>
+                    <div class="kpi-datos">
+                        <p class="kpi-etiqueta">Ingresos Totales</p>
+                        <p class="kpi-valor" id="finIngresosTotal">€ 0</p>
+                        <p class="kpi-tendencia tendencia-positiva">De pedidos entregados</p>
+                    </div>
+                </div>
+                <!-- Total de pedidos (todos los estados) -->
+                <div class="kpi-card kpi-azul">
+                    <div class="kpi-icono-wrapper"><i class="fas fa-file-invoice"></i></div>
+                    <div class="kpi-datos">
+                        <p class="kpi-etiqueta">Pedidos Este Mes</p>
+                        <p class="kpi-valor" id="finNPedidos">0</p>
+                        <p class="kpi-tendencia tendencia-positiva"><i class="fas fa-check"></i> Incluye entregados</p>
+                    </div>
+                </div>
+                <!-- Ticket medio = ingresos / nº pedidos entregados -->
+                <div class="kpi-card kpi-naranja">
+                    <div class="kpi-icono-wrapper"><i class="fas fa-receipt"></i></div>
+                    <div class="kpi-datos">
+                        <p class="kpi-etiqueta">Ticket Medio</p>
+                        <p class="kpi-valor" id="finTicketMedio">€ 0</p>
+                        <p class="kpi-tendencia tendencia-positiva">Por pedido</p>
+                    </div>
+                </div>
+                <!-- Pedidos cancelados -->
+                <div class="kpi-card kpi-rojo">
+                    <div class="kpi-icono-wrapper"><i class="fas fa-ban"></i></div>
+                    <div class="kpi-datos">
+                        <p class="kpi-etiqueta">Pedidos Cancelados</p>
+                        <p class="kpi-valor" id="finCancelados">0</p>
+                        <p class="kpi-tendencia tendencia-negativa">Requieren revisión</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Fila inferior: tabla de pedidos + gráfico de barras -->
+            <div class="bottom-grid" style="grid-template-columns: 1fr 320px">
+
+                <!-- Tabla completa con el historial de pedidos de todos los clientes -->
+                <div class="panel-card">
+                    <div class="panel-card-header">
+                        <h3><i class="fas fa-list-alt"></i> Historial de Pedidos</h3>
+                    </div>
+                    <div class="tabla-wrapper">
+                        <table>
+                            <thead>
+                                <!-- Columnas: id, fecha, cliente, importe, estado, enlace a líneas -->
+                                <tr><th>#</th><th>Fecha</th><th>Cliente</th><th>Importe</th><th>Estado</th><th>Líneas</th></tr>
+                            </thead>
+                            <!-- Las filas las genera renderFinanzas() en gerente.js -->
+                            <tbody id="tablaPedidosBody"></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Gráfico de barras CSS (no usa ninguna librería externa) -->
+                <!-- renderFinanzas() genera las barras con altura proporcional al valor -->
+                <div class="panel-card">
+                    <div class="panel-card-header">
+                        <h3><i class="fas fa-chart-bar"></i> Ingresos Mensuales</h3>
+                    </div>
+                    <!-- El JS genera el gráfico de barras aquí con CSS puro -->
+                    <div class="grafico-barras" id="graficoBars"></div>
+                </div>
+            </div>
+        </div>
+
+    </main><!-- fin page-content -->
+</div><!-- fin app-body -->
+
+
+<!-- ═══════════════════════════════════════════════════════════════
+     MODALES — Ventanas emergentes para CRUD y confirmaciones
+     ─────────────────────────────────────────────────────────────
+     Todos los modales comparten el mismo overlay oscuro (#modalOverlay).
+     Cada modal empieza oculto y se muestra/oculta con las funciones
+     abrirModal(id) y cerrarModales() de gerente.js.
+     Al hacer clic en el overlay oscuro también se cierran todos.
+═══════════════════════════════════════════════════════════════ -->
+
+<!-- Overlay: fondo oscuro compartido por todos los modales -->
+<!-- onclick="cerrarModales()" cierra cualquier modal al hacer clic fuera -->
+<div class="modal-overlay" id="modalOverlay" onclick="cerrarModales()"></div>
+
+<!-- ── Modal: Crear / Editar Producto ── -->
+<!-- Se abre desde abrirModalProducto(id): null para crear, id para editar -->
+<div class="modal" id="modalProducto">
+    <div class="modal-header">
+        <!-- El título cambia entre "Nuevo Producto" y "Editar Producto" según el modo -->
+        <h3 id="modalProductoTitulo">Nuevo Producto</h3>
+        <button class="modal-cerrar" onclick="cerrarModales()"><i class="fas fa-times"></i></button>
+    </div>
+    <div class="modal-body">
+        <!-- Campo oculto con el id del producto (vacío al crear, relleno al editar) -->
+        <input type="hidden" id="mpId">
+        <div class="modal-grid-2">
+            <!-- Referencia del producto (PROD-001, etc.) -->
+            <div class="modal-campo">
+                <label>Referencia *</label>
+                <input type="text" id="mpRef" placeholder="PROD-000">
+                <span class="modal-error" id="errMpRef"></span>
+            </div>
+            <!-- Precio unitario del producto -->
+            <div class="modal-campo">
+                <label>Precio (€) *</label>
+                <input type="number" id="mpPrecio" min="0" step="0.01" placeholder="0.00">
+                <span class="modal-error" id="errMpPrecio"></span>
+            </div>
+        </div>
+        <!-- Nombre del producto (obligatorio) -->
+        <div class="modal-campo">
+            <label>Nombre del producto *</label>
+            <input type="text" id="mpNombre" placeholder="Nombre descriptivo">
+            <span class="modal-error" id="errMpNombre"></span>
+        </div>
+        <!-- Descripción opcional -->
+        <div class="modal-campo">
+            <label>Descripción</label>
+            <textarea id="mpDescripcion" rows="2" placeholder="Descripción técnica..."></textarea>
+        </div>
+        <!-- Proveedor opcional -->
+        <div class="modal-campo">
+            <label>Proveedor</label>
+            <input type="text" id="mpProveedor" placeholder="Nombre del proveedor">
+        </div>
+        <div class="modal-grid-2">
+            <!-- Stock actual: cuántas unidades hay ahora mismo -->
+            <div class="modal-campo">
+                <label>Stock Actual *</label>
+                <input type="number" id="mpStockActual" min="0" placeholder="0">
+                <span class="modal-error" id="errMpStock"></span>
+            </div>
+            <!-- Stock mínimo: cuando baje de este valor se genera alerta -->
+            <div class="modal-campo">
+                <label>Stock Mínimo *</label>
+                <input type="number" id="mpStockMinimo" min="0" placeholder="0">
+            </div>
+        </div>
+    </div>
+    <div class="modal-footer">
+        <button class="btn-modal-cancelar" onclick="cerrarModales()">Cancelar</button>
+        <!-- Guardar llama a guardarProducto() que hace POST o PUT según si hay id -->
+        <button class="btn-modal-guardar"  onclick="guardarProducto()">
+            <i class="fas fa-save"></i> Guardar
+        </button>
+    </div>
+</div>
+
+<!-- ── Modal: Crear / Editar Tarea del equipo ── -->
+<!-- Se abre desde abrirModalTarea(id): null para crear, id para editar -->
+<div class="modal" id="modalTareaEquipo">
+    <div class="modal-header">
+        <h3 id="modalTareaTitulo">Nueva Tarea</h3>
+        <button class="modal-cerrar" onclick="cerrarModales()"><i class="fas fa-times"></i></button>
+    </div>
+    <div class="modal-body">
+        <!-- Campo oculto con el id de la tarea (vacío al crear) -->
+        <input type="hidden" id="mtId">
+        <!-- Título de la tarea (obligatorio) -->
+        <div class="modal-campo">
+            <label>Título *</label>
+            <input type="text" id="mtTitulo" placeholder="Título de la tarea">
+            <span class="modal-error" id="errMtTitulo"></span>
+        </div>
+        <!-- Descripción detallada de la tarea -->
+        <div class="modal-campo">
+            <label>Descripción</label>
+            <textarea id="mtDescripcion" rows="2" placeholder="Detalle de la tarea..."></textarea>
+        </div>
+        <div class="modal-grid-2">
+            <!-- Select de trabajador: el JS lo rellena con los trabajadores activos -->
+            <div class="modal-campo">
+                <label>Trabajador asignado *</label>
+                <select id="mtTrabajador"></select>
+                <span class="modal-error" id="errMtTrabajador"></span>
+            </div>
+            <!-- Estado inicial de la tarea -->
+            <div class="modal-campo">
+                <label>Estado inicial</label>
+                <select id="mtEstado">
+                    <option value="PENDIENTE">Pendiente</option>
+                    <option value="EN_PROGRESO">En Progreso</option>
+                </select>
+            </div>
+        </div>
+        <!-- Fecha de asignación de la tarea -->
+        <div class="modal-campo">
+            <label>Fecha de asignación</label>
+            <input type="date" id="mtFecha">
+        </div>
+    </div>
+    <div class="modal-footer">
+        <button class="btn-modal-cancelar" onclick="cerrarModales()">Cancelar</button>
+        <!-- Guardar llama a guardarTareaEquipo() que hace POST o PUT según si hay id -->
+        <button class="btn-modal-guardar"  onclick="guardarTareaEquipo()">
+            <i class="fas fa-save"></i> Guardar
+        </button>
+    </div>
+</div>
+
+<!-- ── Modal: Crear / Editar Trabajador ── -->
+<!-- Se abre desde abrirModalTrabajador(id) -->
+<div class="modal" id="modalTrabajador">
+    <div class="modal-header">
+        <h3 id="modalTrabajadorTitulo">Nuevo Trabajador</h3>
+        <button class="modal-cerrar" onclick="cerrarModales()"><i class="fas fa-times"></i></button>
+    </div>
+    <div class="modal-body">
+        <!-- Campo oculto con el id del usuario (vacío al crear) -->
+        <input type="hidden" id="mtrId">
+        <div class="modal-grid-2">
+            <!-- Nombre completo del trabajador -->
+            <div class="modal-campo">
+                <label>Nombre completo *</label>
+                <input type="text" id="mtrNombre" placeholder="Nombre y apellidos">
+                <span class="modal-error" id="errMtrNombre"></span>
+            </div>
+            <!-- Turno (solo visual, no se guarda en la BD en esta versión) -->
+            <div class="modal-campo">
+                <label>Turno</label>
+                <select id="mtrTurno">
+                    <option value="Mañana">Mañana</option>
+                    <option value="Tarde">Tarde</option>
+                    <option value="Noche">Noche</option>
+                </select>
+            </div>
+        </div>
+        <!-- Email del trabajador (será su usuario de login) -->
+        <div class="modal-campo">
+            <label>Correo electrónico *</label>
+            <input type="email" id="mtrEmail" placeholder="email@dipymes.com">
+            <span class="modal-error" id="errMtrEmail"></span>
+        </div>
+        <!-- Contraseña: obligatoria al crear, opcional al editar -->
+        <div class="modal-campo">
+            <label>Contraseña *</label>
+            <input type="password" id="mtrPassword" placeholder="Mínimo 4 caracteres">
+            <span class="modal-error" id="errMtrPassword"></span>
+        </div>
+        <!-- Estado: activo (puede loguearse) / inactivo (bloqueado) -->
+        <div class="modal-campo">
+            <label>Estado</label>
+            <select id="mtrActivo">
+                <option value="true">Activo</option>
+                <option value="false">Inactivo</option>
+            </select>
+        </div>
+    </div>
+    <div class="modal-footer">
+        <button class="btn-modal-cancelar" onclick="cerrarModales()">Cancelar</button>
+        <!-- Guardar llama a guardarTrabajador() que hace POST o PUT según si hay id -->
+        <button class="btn-modal-guardar"  onclick="guardarTrabajador()">
+            <i class="fas fa-save"></i> Guardar
+        </button>
+    </div>
+</div>
+
+<!-- ── Modal: Detalle de pedido (líneas de productos) ── -->
+<!-- Se abre desde verDetallePedido(id) en la sección de finanzas -->
+<div class="modal" id="modalPedido">
+    <div class="modal-header">
+        <!-- El título se rellena con "Pedido #X — Fecha" al abrir el modal -->
+        <h3 id="modalPedidoTitulo">Detalle del Pedido</h3>
+        <button class="modal-cerrar" onclick="cerrarModales()"><i class="fas fa-times"></i></button>
+    </div>
+    <!-- El JS genera aquí la tabla con las líneas del pedido (producto, cantidad, precio, subtotal) -->
+    <div class="modal-body" id="modalPedidoBody"></div>
+    <div class="modal-footer">
+        <button class="btn-modal-cancelar" onclick="cerrarModales()">Cerrar</button>
+    </div>
+</div>
+
+<!-- ── Modal: Confirmación de borrado ── -->
+<!-- Se reutiliza para confirmar la eliminación de productos, tareas y trabajadores -->
+<div class="modal modal-sm" id="modalConfirmar">
+    <div class="modal-header">
+        <h3>Confirmar eliminación</h3>
+        <button class="modal-cerrar" onclick="cerrarModales()"><i class="fas fa-times"></i></button>
+    </div>
+    <div class="modal-body">
+        <!-- El mensaje se personaliza con el nombre del elemento a borrar -->
+        <p id="confirmarMensaje" style="color:#64748b; font-size:0.9rem; line-height:1.6"></p>
+    </div>
+    <div class="modal-footer">
+        <button class="btn-modal-cancelar" onclick="cerrarModales()">Cancelar</button>
+        <!-- El onclick se asigna dinámicamente en confirmarEliminar*() para cada tipo -->
+        <button class="btn-modal-eliminar" id="btnConfirmarEliminar">
+            <i class="fas fa-trash"></i> Eliminar
+        </button>
+    </div>
+</div>
+
+
+<!-- Script con toda la lógica del panel del gerente -->
+<script src="gerente.js"></script>
 </body>
 </html>

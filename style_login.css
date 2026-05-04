@@ -1,129 +1,482 @@
-/* style_login.css */
+/*
+ * style_login.css — Estilos de la pantalla de login
+ * ====================================================
+ * Diseño: pantalla dividida en dos paneles
+ *   - Panel izquierdo: branding oscuro con gradiente verde
+ *   - Panel derecho  : formulario de acceso sobre fondo claro
+ */
 
-body {
+/* ── RESET Y VARIABLES ───────────────────────────────────────────── */
+*, *::before, *::after {
+    box-sizing: border-box;
     margin: 0;
     padding: 0;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background: #111e2f url('path-to-your-background-texture.png') no-repeat center center fixed;
-    background-size: cover;
-    color: white;
+}
+
+:root {
+    /* Paleta de colores principal de DI-PYMES */
+    --verde-primario  : #00CC99;
+    --verde-oscuro    : #00a87f;
+    --verde-muy-oscuro: #007a5e;
+    --fondo-oscuro    : #0f1923;
+    --fondo-panel     : #111e2f;
+    --fondo-claro     : #f8fafc;
+    --blanco          : #ffffff;
+    --gris-texto      : #64748b;
+    --gris-borde      : #e2e8f0;
+    --rojo-error      : #ef4444;
+    --rojo-error-bg   : #fef2f2;
+
+    /* Tipografía */
+    --fuente: 'Inter', 'Segoe UI', sans-serif;
+
+    /* Sombras */
+    --sombra-card: 0 20px 60px rgba(0,0,0,0.08);
+    --sombra-btn : 0 4px 15px rgba(0, 204, 153, 0.4);
+}
+
+body {
+    font-family: var(--fuente);
+    background: var(--fondo-claro);
     min-height: 100vh;
     display: flex;
-    justify-content: center;
-    align-items: center;
+    align-items: stretch;
 }
 
-/* --- CONTENEDOR PRINCIPAL (El que perdimos) --- */
-.login-wrapper {
+/* ── CONTENEDOR PRINCIPAL ────────────────────────────────────────── */
+/*
+ * Divide la pantalla en dos columnas:
+ *   - Panel izquierdo ocupa 45% del ancho
+ *   - Panel derecho ocupa 55%
+ */
+.login-container {
+    display: flex;
+    width: 100%;
+    min-height: 100vh;
+}
+
+/* ── PANEL IZQUIERDO — BRANDING ──────────────────────────────────── */
+.panel-izquierdo {
+    width: 45%;
+    background: var(--fondo-panel);
+    padding: 50px 56px;
     display: flex;
     flex-direction: column;
-    align-items: center;
-    gap: 40px; 
-    width: 90%;
-    max-width: 900px;
-    padding: 20px;
+    justify-content: center;
+    position: relative;         /* Necesario para posicionar los orbes */
+    overflow: hidden;           /* Recortar orbes que se salgan del panel */
 }
 
-/* --- TÍTULO  --- */
-.login-title {
-    font-size: 3rem;
-    font-weight: 300;
+/* Logo + nombre de la app */
+.brand {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 60px;
+}
+
+.brand-logo {
+    width: 48px;
+    height: 48px;
+    background: var(--verde-primario);
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.4rem;
     color: white;
-    text-shadow: 0 0 10px cyan; 
-    text-align: center;
-    margin: 0;
+    /* Sombra difuminada verde para el logo */
+    box-shadow: 0 0 20px rgba(0,204,153,0.5);
 }
 
-
-.login-bar {
-    display: flex;
-    flex-direction: row;
-    gap: 20px;
-    background-color: transparent;
-    padding: 20px 0;
-    width: 100%;
-    max-width: 800px;
-    justify-content: center;
+.brand-nombre {
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: white;
+    letter-spacing: 2px;
 }
 
-.login-bar input {
-    flex: 1;
-    padding: 15px 20px;
-    background-color: rgba(0, 255, 255, 0.03);
-    border: 1px solid rgba(0, 255, 255, 0.3);
-    border-radius: 8px;
+/* Título y subtítulo del panel izquierdo */
+.brand-copy {
+    margin-bottom: 48px;
+    position: relative;  /* Por encima de los orbes decorativos */
+    z-index: 1;
+}
+
+.brand-copy h1 {
+    font-size: 2.6rem;
+    font-weight: 700;
+    color: white;
+    line-height: 1.2;
+    margin-bottom: 16px;
+}
+
+/* Palabra resaltada en verde dentro del título */
+.brand-copy .highlight {
+    color: var(--verde-primario);
+}
+
+.brand-copy p {
     font-size: 1rem;
-    color: #ffffff;
-    transition: all 0.3s ease;
+    color: rgba(255,255,255,0.6);
+    line-height: 1.7;
+    max-width: 380px;
 }
 
-.login-bar input::placeholder {
-    color: rgba(255, 255, 255, 0.5);
-}
-
-.login-bar input:focus {
-    outline: none;
-    border-color: cyan;
-    box-shadow: 0 0 12px rgba(0, 255, 255, 0.4);
-    background-color: rgba(0, 255, 255, 0.08);
-}
-
-.login-bar button {
-    flex: 0 0 auto;
-    padding: 15px 40px;
-    background-color: transparent;
-    border: 2px solid cyan;
-    border-radius: 8px;
-    color: cyan;
-    font-size: 1.1rem;
-    font-weight: bold;
-    cursor: pointer;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    transition: all 0.3s ease;
-    box-shadow: 0 0 10px rgba(0, 255, 255, 0.2), inset 0 0 10px rgba(0, 255, 255, 0.1);
-}
-
-.login-bar button:hover {
-    background-color: cyan;
-    color: #111e2f;
-    box-shadow: 0 0 20px rgba(0, 255, 255, 0.8);
-}
-
-.circles-row {
-    display: flex;
-    flex-direction: row;
-    justify-content: space-evenly;
-    align-items: flex-start;
-    width: 100%;
-}
-
-.circle-item {
+/* Lista de características del sistema */
+.feature-list {
+    list-style: none;
     display: flex;
     flex-direction: column;
-    align-items: center;
-    text-align: center;
+    gap: 18px;
+    position: relative;
+    z-index: 1;
 }
 
-.circle-icon {
-    width: 120px;
-    height: 120px;
-    border: 2px solid cyan;
+.feature-list li {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    color: rgba(255,255,255,0.8);
+    font-size: 0.95rem;
+}
+
+/* Icono de cada característica */
+.feature-icon {
+    width: 36px;
+    height: 36px;
+    background: rgba(0,204,153,0.15);
+    border: 1px solid rgba(0,204,153,0.3);
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--verde-primario);
+    font-size: 0.9rem;
+    flex-shrink: 0;
+}
+
+/*
+ * ORBES DECORATIVOS
+ * Círculos difuminados para dar profundidad al panel izquierdo.
+ * Usan position: absolute para no afectar al flujo del documento.
+ */
+.orbe {
+    position: absolute;
     border-radius: 50%;
-    box-shadow: 0 0 10px cyan;
+    filter: blur(80px);         /* Difuminado para efecto neón suave */
+    pointer-events: none;       /* No interceptar clics del usuario */
+    z-index: 0;
+}
+
+.orbe-1 {
+    width: 300px;
+    height: 300px;
+    background: rgba(0, 204, 153, 0.15);
+    top: -80px;
+    right: -80px;
+}
+
+.orbe-2 {
+    width: 250px;
+    height: 250px;
+    background: rgba(0, 168, 127, 0.1);
+    bottom: -60px;
+    left: -60px;
+}
+
+/* ── PANEL DERECHO — FORMULARIO ──────────────────────────────────── */
+.panel-derecho {
+    flex: 1;                        /* Ocupa el espacio restante */
+    background: var(--fondo-claro);
     display: flex;
-    justify-content: center;
     align-items: center;
-    margin-bottom: 10px;
+    justify-content: center;
+    padding: 40px 32px;
 }
 
-.circle-icon i {
-    font-size: 3rem;
-    color: cyan;
+/* Tarjeta del formulario */
+.form-card {
+    background: var(--blanco);
+    border-radius: 24px;
+    padding: 48px 44px;
+    width: 100%;
+    max-width: 440px;
+    box-shadow: var(--sombra-card);
 }
 
-.circle-label {
+/* Cabecera de la tarjeta */
+.form-header {
+    margin-bottom: 36px;
+}
+
+.form-header h2 {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: #0f172a;
+    margin-bottom: 8px;
+}
+
+.form-header p {
+    color: var(--gris-texto);
+    font-size: 0.95rem;
+}
+
+/* ── CAMPOS DEL FORMULARIO ───────────────────────────────────────── */
+/*
+ * Cada campo (.campo) contiene:
+ *   - label    : etiqueta descriptiva
+ *   - input    : campo de texto (o .input-wrapper con botón de ojo)
+ *   - .error-msg : mensaje de validación (vacío por defecto)
+ */
+.campo {
+    margin-bottom: 20px;
+}
+
+.campo label {
+    display: block;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #374151;
+    margin-bottom: 8px;
+}
+
+.campo label i {
+    margin-right: 6px;
+    color: var(--gris-texto);
+    font-size: 0.8rem;
+}
+
+/* Input base */
+.campo input {
+    width: 100%;
+    padding: 13px 16px;
+    border: 1.5px solid var(--gris-borde);
+    border-radius: 12px;
+    font-size: 0.95rem;
+    font-family: var(--fuente);
+    color: #0f172a;
+    background: #fafafa;
+    transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
+    outline: none;
+}
+
+.campo input:focus {
+    border-color: var(--verde-primario);
+    background: var(--blanco);
+    box-shadow: 0 0 0 4px rgba(0, 204, 153, 0.12);
+}
+
+.campo input::placeholder {
+    color: #b0bec5;
+}
+
+/*
+ * Estado de error en un campo
+ * Se aplica la clase .campo-error al div .campo mediante JS
+ * cuando la validación falla.
+ */
+.campo-error input {
+    border-color: var(--rojo-error);
+    background: var(--rojo-error-bg);
+}
+
+.campo-error input:focus {
+    box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.12);
+}
+
+/* Mensaje de error debajo del input */
+.error-msg {
+    display: block;
+    font-size: 0.78rem;
+    color: var(--rojo-error);
+    margin-top: 6px;
+    min-height: 16px;   /* Reservar espacio para que el layout no salte */
+}
+
+/* Wrapper del campo contraseña (input + botón ojo) */
+.input-wrapper {
+    position: relative;
+}
+
+.input-wrapper input {
+    padding-right: 48px;    /* Espacio para el botón de ojo */
+}
+
+/* Botón de mostrar/ocultar contraseña */
+.btn-ojo {
+    position: absolute;
+    right: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--gris-texto);
+    font-size: 0.95rem;
+    padding: 4px;
+    transition: color 0.2s;
+}
+
+.btn-ojo:hover {
+    color: var(--verde-primario);
+}
+
+/* ── ALERTA DE ERROR GENERAL ─────────────────────────────────────── */
+/*
+ * Se muestra cuando las credenciales no coinciden con ningún usuario.
+ * Empieza con display:none y se activa desde JS.
+ */
+.alert-error {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: var(--rojo-error-bg);
+    border: 1px solid #fca5a5;
+    border-radius: 10px;
+    padding: 12px 16px;
+    color: #b91c1c;
+    font-size: 0.875rem;
+    margin-bottom: 20px;
+}
+
+.alert-error i {
     font-size: 1rem;
+    flex-shrink: 0;
+}
+
+/*
+ * Animación "shake" para llamar la atención sobre el error.
+ * Se aplica dinámicamente desde JS al mostrar la alerta.
+ */
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    20%       { transform: translateX(-6px); }
+    40%       { transform: translateX(6px); }
+    60%       { transform: translateX(-4px); }
+    80%       { transform: translateX(4px); }
+}
+
+.shake {
+    animation: shake 0.4s ease;
+}
+
+/* ── BOTÓN PRINCIPAL DE LOGIN ────────────────────────────────────── */
+.btn-login {
+    width: 100%;
+    padding: 15px;
+    background: var(--verde-primario);
     color: white;
-    padding: 0 5px;
+    border: none;
+    border-radius: 12px;
+    font-size: 1rem;
+    font-weight: 700;
+    font-family: var(--fuente);
+    cursor: pointer;
+    transition: background 0.2s, transform 0.1s, box-shadow 0.2s;
+    box-shadow: var(--sombra-btn);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.btn-login:hover:not(:disabled) {
+    background: var(--verde-oscuro);
+    transform: translateY(-1px);
+    box-shadow: 0 6px 20px rgba(0, 204, 153, 0.5);
+}
+
+.btn-login:active:not(:disabled) {
+    transform: translateY(0);
+}
+
+.btn-login:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+}
+
+/* ── PIE DE FORMULARIO: CREDENCIALES DE PRUEBA ───────────────────── */
+.form-footer {
+    margin-top: 28px;
+    padding-top: 24px;
+    border-top: 1px solid var(--gris-borde);
+    text-align: center;
+}
+
+.form-footer p {
+    font-size: 0.8rem;
+    color: var(--gris-texto);
+    margin-bottom: 12px;
+}
+
+.form-footer p i {
+    margin-right: 4px;
+    color: var(--verde-primario);
+}
+
+/* Contenedor de los pills de credenciales */
+.creds-grid {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+/*
+ * Pills clicables que rellenan el formulario con credenciales de prueba.
+ * onclick → rellenarCredencial() en JS
+ */
+.cred-pill {
+    padding: 5px 14px;
+    border-radius: 20px;
+    font-size: 0.78rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: transform 0.15s, opacity 0.15s;
+    user-select: none;
+}
+
+.cred-pill:hover {
+    transform: scale(1.05);
+    opacity: 0.85;
+}
+
+.cred-pill.gerente    { background: #e0f2fe; color: #0369a1; }
+.cred-pill.trabajador { background: #dcfce7; color: #15803d; }
+.cred-pill.cliente    { background: #fef3c7; color: #b45309; }
+
+/* ── RESPONSIVE ──────────────────────────────────────────────────── */
+/*
+ * En pantallas pequeñas (móvil/tablet) ocultamos el panel izquierdo
+ * y el panel derecho ocupa toda la pantalla.
+ */
+@media (max-width: 900px) {
+    .panel-izquierdo {
+        display: none;
+    }
+
+    .panel-derecho {
+        padding: 32px 20px;
+        background: var(--fondo-oscuro);   /* Fondo oscuro en móvil */
+    }
+
+    .form-card {
+        box-shadow: none;
+        border: 1px solid rgba(255,255,255,0.08);
+        background: rgba(255,255,255,0.05);
+        backdrop-filter: blur(10px);        /* Glassmorphism en móvil */
+        color: white;
+    }
+
+    .form-header h2,
+    .campo label,
+    .campo input {
+        color: white;
+    }
+
+    .campo input {
+        background: rgba(255,255,255,0.08);
+        border-color: rgba(255,255,255,0.15);
+    }
 }

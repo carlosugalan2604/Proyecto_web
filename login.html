@@ -3,49 +3,224 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DI-PYMES Login</title>
-    
-    <link rel="stylesheet" href="style_login.css">
-    
+    <title>DI-PYMES | Acceso</title>
+
+    <!-- Google Fonts: Inter (tipografía moderna profesional) -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <!-- Font Awesome: librería de iconos vectoriales que usamos en todo el proyecto -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Hoja de estilos específica de la pantalla de login -->
+    <link rel="stylesheet" href="style_login.css">
 </head>
 <body>
 
-    <main class="login-wrapper">
-        
-        <h1 class="login-title">DI-PYMES</h1>
+    <!--
+    ============================================================
+      ESTRUCTURA GENERAL DE LA PANTALLA DE LOGIN
+      ------------------------------------------
+      La pantalla se divide en dos paneles horizontales:
+        - .panel-izquierdo : lado oscuro con el branding de la app
+        - .panel-derecho   : lado claro con el formulario de acceso
 
-        <div class="login-bar">
-            <input type="email" placeholder="Correo electrónico" required />
-            <input type="password" placeholder="Contraseña" required />
-            <button type="submit">Iniciar Sesión</button>
+      En móvil, el panel izquierdo se oculta y el derecho ocupa
+      toda la pantalla (ver media queries en style_login.css).
+    ============================================================
+    -->
+    <div class="login-container">
+
+        <!-- ═══════════════════════════════════════════════════════
+             PANEL IZQUIERDO — BRANDING Y CARACTERÍSTICAS
+             Panel oscuro con logo, título y lista de funcionalidades
+             de la aplicación. Solo decorativo/informativo.
+        ═══════════════════════════════════════════════════════ -->
+        <div class="panel-izquierdo">
+
+            <!-- Logo de la aplicación con icono de edificio y nombre DI-PYMES -->
+            <div class="brand">
+                <div class="brand-logo">
+                    <i class="fas fa-building"></i>
+                </div>
+                <span class="brand-nombre">DI-PYMES</span>
+            </div>
+
+            <!-- Título principal y descripción del sistema -->
+            <div class="brand-copy">
+                <h1>Gestión empresarial<br><span class="highlight">inteligente</span></h1>
+                <p>Controla tu negocio desde un único lugar. Tareas, stock, pedidos y finanzas en tiempo real.</p>
+            </div>
+
+            <!-- Lista de características que ofrece la aplicación -->
+            <ul class="feature-list">
+                <!-- Cada li muestra un icono + descripción de una funcionalidad -->
+                <li>
+                    <span class="feature-icon"><i class="fas fa-chart-line"></i></span>
+                    <span>Dashboard con métricas en tiempo real</span>
+                </li>
+                <li>
+                    <span class="feature-icon"><i class="fas fa-boxes"></i></span>
+                    <span>Control de inventario y alertas de stock</span>
+                </li>
+                <li>
+                    <span class="feature-icon"><i class="fas fa-users-cog"></i></span>
+                    <span>Gestión de equipos y tareas asignadas</span>
+                </li>
+                <li>
+                    <span class="feature-icon"><i class="fas fa-file-invoice"></i></span>
+                    <span>Historial de pedidos por cliente</span>
+                </li>
+            </ul>
+
+            <!--
+              Elementos decorativos: dos círculos difuminados (orbes)
+              que dan profundidad al fondo oscuro del panel izquierdo.
+              No tienen funcionalidad, son solo visuales.
+            -->
+            <div class="orbe orbe-1"></div>
+            <div class="orbe orbe-2"></div>
         </div>
 
-        <div class="circles-row">
-            
-            <div class="circle-item">
-                <div class="circle-icon"><i class="fas fa-clipboard-list"></i></div>
-                <span class="circle-label">Gestión de Tareas</span>
-            </div>
+        <!-- ═══════════════════════════════════════════════════════
+             PANEL DERECHO — FORMULARIO DE INICIO DE SESIÓN
+             Contiene la tarjeta blanca con el formulario de acceso.
+        ═══════════════════════════════════════════════════════ -->
+        <div class="panel-derecho">
+            <div class="form-card">
 
-            <div class="circle-item">
-                <div class="circle-icon"><i class="fas fa-boxes"></i></div>
-                <span class="circle-label">Control de Stock</span>
-            </div>
+                <!-- Cabecera de la tarjeta: título y subtítulo del formulario -->
+                <div class="form-header">
+                    <h2>Bienvenido de nuevo</h2>
+                    <p>Introduce tus credenciales para acceder</p>
+                </div>
 
-            <div class="circle-item">
-                <div class="circle-icon"><i class="fas fa-euro-sign"></i></div>
-                <span class="circle-label">Finanzas Claras</span>
-            </div>
+                <!--
+                  FORMULARIO DE LOGIN
+                  -------------------
+                  id="loginForm"  → lo referenciamos en JS para capturar el evento submit
+                  novalidate      → desactivamos la validación nativa del navegador
+                                    porque usamos nuestra propia validación en login.js
+                                    (así controlamos el aspecto de los mensajes de error)
+                -->
+                <form id="loginForm" novalidate>
 
-            <div class="circle-item">
-                <div class="circle-icon"><i class="fas fa-users"></i></div>
-                <span class="circle-label">Base de Datos<br>Clientes</span>
-            </div>
+                    <!-- ── Campo de correo electrónico ── -->
+                    <!--
+                      id="campoEmail" → el JS le añade la clase 'campo-error' si hay error
+                                        para poner el borde rojo al input
+                    -->
+                    <div class="campo" id="campoEmail">
+                        <label for="inputEmail">
+                            <i class="fas fa-envelope"></i> Correo electrónico
+                        </label>
+                        <input
+                            type="email"
+                            id="inputEmail"
+                            placeholder="usuario@dipymes.com"
+                            autocomplete="email"
+                        />
+                        <!-- Mensaje de error que aparece debajo del campo si el email no es válido -->
+                        <!-- El JS lo rellena con texto o lo deja vacío según la validación -->
+                        <span class="error-msg" id="errorEmail"></span>
+                    </div>
 
+                    <!-- ── Campo de contraseña ── -->
+                    <div class="campo" id="campoPassword">
+                        <label for="inputPassword">
+                            <i class="fas fa-lock"></i> Contraseña
+                        </label>
+
+                        <!--
+                          .input-wrapper envuelve el input y el botón del ojo
+                          para poder posicionar el ojo encima del input con CSS
+                        -->
+                        <div class="input-wrapper">
+                            <input
+                                type="password"
+                                id="inputPassword"
+                                placeholder="••••••••"
+                                autocomplete="current-password"
+                            />
+
+                            <!--
+                              Botón para ver/ocultar la contraseña.
+                              type="button" evita que al pulsarlo haga submit del formulario.
+                              onclick llama a togglePassword() definido en login.js,
+                              que cambia el type del input entre 'password' y 'text'.
+                            -->
+                            <button
+                                type="button"
+                                class="btn-ojo"
+                                id="btnOjo"
+                                onclick="togglePassword()"
+                                title="Mostrar / ocultar contraseña"
+                            >
+                                <i class="fas fa-eye" id="iconoOjo"></i>
+                            </button>
+                        </div>
+                        <!-- Mensaje de error de la contraseña (igual que el del email) -->
+                        <span class="error-msg" id="errorPassword"></span>
+                    </div>
+
+                    <!--
+                      ALERTA DE ERROR GENERAL
+                      -----------------------
+                      Se muestra cuando las credenciales son incorrectas (error 401 de la API).
+                      Empieza oculta (display:none) y el JS la hace visible cuando hay error.
+                      También muestra una animación "shake" para llamar la atención.
+                    -->
+                    <div class="alert-error" id="alertaGeneral" style="display:none;">
+                        <i class="fas fa-exclamation-circle"></i>
+                        <span id="alertaTexto">Correo o contraseña incorrectos.</span>
+                    </div>
+
+                    <!--
+                      BOTÓN DE ENVÍO
+                      --------------
+                      Cuando el usuario pulsa el botón o pulsa Enter en el formulario,
+                      se dispara el evento 'submit' capturado en login.js.
+                      Durante la petición a la API, el JS oculta el texto y muestra
+                      el spinner para que el usuario sepa que se está procesando.
+                    -->
+                    <button type="submit" class="btn-login" id="btnLogin">
+                        <!-- Texto normal del botón -->
+                        <span class="btn-texto">Iniciar Sesión</span>
+                        <!-- Spinner giratorio que aparece mientras se hace la petición HTTP -->
+                        <!-- El JS alterna entre mostrar el texto y el spinner -->
+                        <span class="btn-spinner" id="btnSpinner" style="display:none;">
+                            <i class="fas fa-spinner fa-spin"></i>
+                        </span>
+                    </button>
+
+                </form>
+
+                <!--
+                  PIE DEL FORMULARIO — CREDENCIALES DE PRUEBA
+                  --------------------------------------------
+                  Los pills de credenciales rellenan el formulario automáticamente
+                  al pulsarlos. Llaman a rellenarCredencial() de login.js.
+                  Son útiles para probar la app sin tener que escribir nada.
+                -->
+                <div class="form-footer">
+                    <p><i class="fas fa-info-circle"></i> Credenciales de prueba:</p>
+                    <div class="creds-grid">
+                        <!-- Pill del gerente: rellena con las credenciales del gerente -->
+                        <span class="cred-pill gerente"    onclick="rellenarCredencial('gerente@dipymes.com',    '1234')">Gerente</span>
+                        <!-- Pill del trabajador -->
+                        <span class="cred-pill trabajador" onclick="rellenarCredencial('trabajador@dipymes.com', '1234')">Trabajador</span>
+                        <!-- Pill del cliente -->
+                        <span class="cred-pill cliente"    onclick="rellenarCredencial('cliente@dipymes.com',    '1234')">Cliente</span>
+                    </div>
+                </div>
+
+            </div>
         </div>
 
-    </main>
+    </div><!-- fin .login-container -->
+
+
+    <!-- Script con toda la lógica del formulario de login -->
+    <script src="login.js"></script>
 
 </body>
 </html>

@@ -3,67 +3,328 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DI-PYMES | Panel de Trabajador</title>
-    <link rel="stylesheet" href="style_dashboard.css">
+    <title>DI-PYMES | Panel Trabajador</title>
+
+    <!-- Google Fonts: tipografía Inter para todo el proyecto -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <!-- Font Awesome: librería de iconos que usamos en botones, badges, etc. -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Estilos del panel del trabajador (también usado por el panel del cliente) -->
+    <link rel="stylesheet" href="style_dashboard.css">
 </head>
+
+<!--
+ ============================================================
+   ESTRUCTURA DEL PANEL DEL TRABAJADOR
+   ------------------------------------
+   El layout es una columna (flex-direction: column) con:
+     .worker-topbar  → barra superior fija con logo, saludo y botón salir
+     .worker-main    → área de contenido principal con scroll
+       .fichar-card  → tarjeta oscura con el reloj y el botón de fichaje
+       .stats-row    → 4 tarjetas con estadísticas de tareas
+       .content-grid → dos columnas: tareas (izquierda) + panel lateral (derecha)
+ ============================================================
+-->
 <body class="worker-body">
 
-    <header class="worker-header">
-        <div class="user-info">
-            <i class="fas fa-user-circle user-avatar"></i>
-            <div>
-                <h2>Hola, Carlos</h2>
-                <p>Turno de Mañana</p>
-            </div>
+    <!-- ═══════════════════════════════════════════════════════
+         TOPBAR — Barra superior fija del panel trabajador
+         ─────────────────────────────────────────────────────
+         Se divide en tres zonas:
+           - Izquierda: logo + nombre de la app
+           - Centro: saludo personalizado con el nombre del trabajador
+           - Derecha: badge de turno + botón para cerrar sesión
+    ═══════════════════════════════════════════════════════ -->
+    <header class="worker-topbar">
+
+        <!-- Zona izquierda: logo circular verde + nombre "DI-PYMES" -->
+        <div class="topbar-brand">
+            <div class="topbar-logo"><i class="fas fa-building"></i></div>
+            <span class="topbar-nombre-app">DI-PYMES</span>
         </div>
-        <button class="btn-logout"><i class="fas fa-sign-out-alt"></i> Salir</button>
+
+        <!-- Zona central: el JS rellena el nombre y la fecha al cargar la página -->
+        <div class="topbar-saludo">
+            <p class="saludo-texto" id="saludoTexto">Hola, Trabajador</p>
+            <p class="saludo-fecha" id="saludoFecha">Cargando fecha...</p>
+        </div>
+
+        <!-- Zona derecha: badge del turno y botón de cerrar sesión -->
+        <div class="topbar-acciones">
+            <!-- Badge informativo del turno (estático, en esta versión no se actualiza) -->
+            <span class="turno-badge" id="turnoBadge">
+                <i class="fas fa-sun"></i> Turno de Mañana
+            </span>
+            <!-- Botón de cerrar sesión: llama a cerrarSesion() en trabajador.js -->
+            <button class="btn-salir" onclick="cerrarSesion()">
+                <i class="fas fa-sign-out-alt"></i> Salir
+            </button>
+        </div>
+
     </header>
 
-    <main class="worker-dashboard">
-        
-        <section class="card clock-in-card">
-            <h3>Control de Horario</h3>
-            <p id="current-time">08:00 AM</p>
-            <button class="btn-action pulse-effect">
-                <i class="fas fa-fingerprint"></i> FICHAR ENTRADA
+    <!-- ═══════════════════════════════════════════════════════
+         CONTENIDO PRINCIPAL — Área con scroll debajo del topbar
+    ═══════════════════════════════════════════════════════ -->
+    <main class="worker-main">
+
+        <!-- ── TARJETA DE FICHAJE ──────────────────────────────
+             Tarjeta oscura con el reloj digital y el botón de fichar.
+             El JS (trabajador.js) controla:
+               - El reloj actualizado cada segundo (iniciarReloj)
+               - El estado del fichaje (toggleFichar)
+               - El historial de entradas/salidas del día
+        ─────────────────────────────────────────────────── -->
+        <section class="fichar-card">
+
+            <!-- Reloj digital: las horas/minutos se actualizan cada segundo por el JS -->
+            <div class="reloj-wrapper">
+                <!-- Las horas y minutos van en grande -->
+                <p class="reloj-hora"   id="relojHora">--:--</p>
+                <!-- Los segundos van más pequeños y en color más tenue -->
+                <p class="reloj-segundo" id="relojSegundo">:--</p>
+            </div>
+
+            <!-- Fecha del día (se rellena con JS al cargar) -->
+            <p class="reloj-fecha" id="relojFecha"></p>
+
+            <!--
+              Indicador de estado del fichaje.
+              El JS cambia entre:
+                - estado-sin-fichar (punto gris) → aún no ha fichado
+                - estado-fichado    (punto verde pulsante) → está trabajando
+            -->
+            <div class="fichar-estado" id="ficharEstado">
+                <span class="estado-punto estado-sin-fichar"></span>
+                <span id="ficharTextoEstado">Sin fichar hoy</span>
+            </div>
+
+            <!--
+              Botón principal de fichaje.
+              Al pulsarlo llama a toggleFichar() en trabajador.js.
+              El JS cambia el icono, texto y color del botón según el estado:
+                - Verde con huella   → fichar ENTRADA
+                - Rojo con flecha    → fichar SALIDA
+            -->
+            <button class="btn-fichar" id="btnFichar" onclick="toggleFichar()">
+                <i class="fas fa-fingerprint" id="iconoFichar"></i>
+                <span id="textoFichar">FICHAR ENTRADA</span>
             </button>
+
+            <!--
+              Historial de fichajes del día actual.
+              El JS genera aquí las etiquetas de "Entrada: 08:00", "Salida: 16:00", etc.
+              Empieza vacío y se va llenando con renderRegistroFichaje().
+            -->
+            <div class="fichar-registro" id="ficharRegistro"></div>
+
         </section>
 
-        <div class="secondary-cards">
-            
-            <section class="card tasks-card">
-                <div class="card-header">
-                    <h3><i class="fas fa-clipboard-list"></i> Mis Tareas Hoy</h3>
-                    <span class="badge">3 Pendientes</span>
+        <!-- ── FILA DE ESTADÍSTICAS RÁPIDAS ───────────────────
+             4 tarjetas con los contadores de tareas del trabajador.
+             Los números los actualiza actualizarContadores() en el JS.
+        ─────────────────────────────────────────────────── -->
+        <div class="stats-row">
+            <!-- Total de tareas asignadas -->
+            <div class="stat-item">
+                <div class="stat-icono stat-azul"><i class="fas fa-clipboard-list"></i></div>
+                <div>
+                    <p class="stat-valor" id="statTotal">3</p>
+                    <p class="stat-label">Tareas totales</p>
                 </div>
-                <ul class="task-list">
-                    <li>
-                        <input type="checkbox" id="tarea1">
-                        <label for="tarea1">Revisar inventario pasillo 4</label>
-                    </li>
-                    <li>
-                        <input type="checkbox" id="tarea2">
-                        <label for="tarea2">Preparar pedido #1042</label>
-                    </li>
-                    <li>
-                        <input type="checkbox" id="tarea3">
-                        <label for="tarea3">Mantenimiento máquina B</label>
-                    </li>
-                </ul>
-            </section>
+            </div>
+            <!-- Tareas en estado PENDIENTE -->
+            <div class="stat-item">
+                <div class="stat-icono stat-naranja"><i class="fas fa-hourglass-half"></i></div>
+                <div>
+                    <p class="stat-valor" id="statPendiente">1</p>
+                    <p class="stat-label">Pendientes</p>
+                </div>
+            </div>
+            <!-- Tareas en estado EN_PROGRESO -->
+            <div class="stat-item">
+                <div class="stat-icono stat-azul-medio"><i class="fas fa-spinner"></i></div>
+                <div>
+                    <p class="stat-valor" id="statProgreso">1</p>
+                    <p class="stat-label">En progreso</p>
+                </div>
+            </div>
+            <!-- Tareas en estado COMPLETADA -->
+            <div class="stat-item">
+                <div class="stat-icono stat-verde"><i class="fas fa-check-double"></i></div>
+                <div>
+                    <p class="stat-valor" id="statCompletada">1</p>
+                    <p class="stat-label">Completadas</p>
+                </div>
+            </div>
+        </div>
 
-            <section class="card stock-card">
-                <h3><i class="fas fa-barcode"></i> Control Rápido</h3>
-                <p>Escanea o busca un artículo para actualizar el stock.</p>
-                <button class="btn-outline">
-                    <i class="fas fa-camera"></i> Escanear Artículo
+        <!-- ── GRID DE DOS COLUMNAS: Tareas + Panel lateral ───
+             En pantallas grandes: izquierda tareas, derecha stock+turno
+             En móvil: solo se ve la columna de tareas (el lateral se oculta)
+        ─────────────────────────────────────────────────── -->
+        <div class="content-grid">
+
+            <!-- ─ Columna izquierda: Lista de tareas ─ -->
+            <section class="panel-card">
+                <div class="panel-header">
+                    <h3><i class="fas fa-clipboard-list"></i> Mis Tareas</h3>
+                    <!--
+                      Badge con el número de tareas pendientes.
+                      El JS lo actualiza con actualizarContadores().
+                      Muestra "1 pendiente" o "3 pendientes" según haya.
+                    -->
+                    <span class="badge-contador" id="badgePendientes">1 pendiente</span>
+                </div>
+
+                <!--
+                  Lista de tareas generada dinámicamente por renderTareas() en el JS.
+                  Cada elemento es un <li> con:
+                    - Botón circular de estado (amarillo, azul o verde)
+                    - Título y descripción de la tarea
+                    - Fecha y badge del estado actual
+                  Al pulsar el botón de estado, cambia al siguiente en el ciclo:
+                    PENDIENTE → EN_PROGRESO → COMPLETADA → PENDIENTE
+                -->
+                <ul class="tareas-lista" id="tareasLista"></ul>
+
+                <!-- Botón al pie de la lista para añadir una nueva tarea manual -->
+                <!-- Abre el modal de nueva tarea llamando a abrirModal() -->
+                <button class="btn-nueva-tarea" onclick="abrirModal()">
+                    <i class="fas fa-plus"></i> Registrar nueva tarea
                 </button>
             </section>
 
-        </div>
+            <!-- ─ Columna derecha: Buscador de stock + Info de turno ─ -->
+            <div class="panel-lateral">
+
+                <!-- Buscador de stock: el trabajador puede consultar el stock de un producto -->
+                <section class="panel-card">
+                    <div class="panel-header">
+                        <h3><i class="fas fa-barcode"></i> Consultar Stock</h3>
+                    </div>
+                    <div class="busqueda-stock">
+                        <div class="busqueda-input-wrapper">
+                            <i class="fas fa-search busqueda-icono"></i>
+                            <!--
+                              Al escribir en este input, el JS llama a buscarProducto()
+                              que filtra el catálogo de productos cargado al iniciar.
+                            -->
+                            <input
+                                type="text"
+                                id="inputBusqueda"
+                                placeholder="Nombre o referencia..."
+                                oninput="buscarProducto(this.value)"
+                            >
+                        </div>
+                        <!--
+                          Los resultados de la búsqueda se generan aquí dinámicamente.
+                          Cada resultado muestra el nombre, el stock y un badge de estado.
+                        -->
+                        <div class="busqueda-resultados" id="busquedaResultados"></div>
+                    </div>
+                </section>
+
+                <!-- Información del turno actual del trabajador -->
+                <!-- Los horarios son estáticos en esta versión (no vienen de la BD) -->
+                <section class="panel-card">
+                    <div class="panel-header">
+                        <h3><i class="fas fa-calendar-day"></i> Mi Turno</h3>
+                    </div>
+                    <div class="turno-info">
+                        <!-- Hora de entrada al trabajo -->
+                        <div class="turno-fila">
+                            <span class="turno-clave"><i class="fas fa-clock"></i> Entrada</span>
+                            <span class="turno-val">08:00</span>
+                        </div>
+                        <!-- Hora de salida del trabajo -->
+                        <div class="turno-fila">
+                            <span class="turno-clave"><i class="fas fa-clock"></i> Salida</span>
+                            <span class="turno-val">16:00</span>
+                        </div>
+                        <!-- Hora del descanso -->
+                        <div class="turno-fila">
+                            <span class="turno-clave"><i class="fas fa-mug-hot"></i> Descanso</span>
+                            <span class="turno-val">10:00 – 10:15</span>
+                        </div>
+                        <!-- Horas trabajadas hoy: se actualiza en tiempo real cuando está fichado -->
+                        <div class="turno-fila">
+                            <span class="turno-clave"><i class="fas fa-user-clock"></i> Horas hoy</span>
+                            <!-- El JS actualiza este valor cada segundo mientras está fichado -->
+                            <span class="turno-val" id="horasTrabajadas">0h 00min</span>
+                        </div>
+                    </div>
+                </section>
+
+            </div><!-- fin .panel-lateral -->
+
+        </div><!-- fin .content-grid -->
 
     </main>
+
+    <!-- ═══════════════════════════════════════════════════════
+         MODAL — Formulario para registrar una nueva tarea
+         ─────────────────────────────────────────────────────
+         El modal empieza oculto (sin la clase 'modal-visible').
+         abrirModal() y cerrarModal() en trabajador.js añaden
+         y quitan esa clase para mostrarlo/ocultarlo con transición.
+
+         Al hacer clic en el overlay oscuro también se cierra.
+    ═══════════════════════════════════════════════════════ -->
+
+    <!-- Fondo oscuro semitransparente que cubre toda la pantalla cuando el modal está abierto -->
+    <div class="modal-overlay" id="modalOverlay" onclick="cerrarModal()"></div>
+
+    <!-- Tarjeta del modal de nueva tarea -->
+    <div class="modal" id="modalTarea">
+        <!-- Cabecera del modal con título y botón de cerrar -->
+        <div class="modal-header">
+            <h3>Registrar Nueva Tarea</h3>
+            <button class="modal-cerrar" onclick="cerrarModal()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+
+        <!-- Cuerpo del modal: campos del formulario -->
+        <div class="modal-body">
+            <!-- Campo obligatorio: título de la tarea -->
+            <div class="modal-campo">
+                <label>Título de la tarea *</label>
+                <input type="text" id="modalTitulo" placeholder="Ej: Revisar inventario almacén">
+                <!-- Mensaje de error que aparece si el título está vacío al guardar -->
+                <span class="modal-error" id="errorTitulo"></span>
+            </div>
+            <!-- Campo opcional: descripción más detallada -->
+            <div class="modal-campo">
+                <label>Descripción</label>
+                <textarea id="modalDescripcion" rows="3" placeholder="Descripción opcional..."></textarea>
+            </div>
+            <!-- Select para el estado inicial de la tarea -->
+            <div class="modal-campo">
+                <label>Estado inicial</label>
+                <select id="modalEstado">
+                    <option value="PENDIENTE">Pendiente</option>
+                    <option value="EN_PROGRESO">En Progreso</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- Pie del modal: botones de cancelar y guardar -->
+        <div class="modal-footer">
+            <!-- Cancelar: cierra el modal sin guardar nada -->
+            <button class="btn-modal-cancelar" onclick="cerrarModal()">Cancelar</button>
+            <!-- Guardar: llama a guardarTarea() en trabajador.js que envía el POST a la API -->
+            <button class="btn-modal-guardar"  onclick="guardarTarea()">
+                <i class="fas fa-save"></i> Guardar Tarea
+            </button>
+        </div>
+    </div>
+
+
+    <!-- Script con toda la lógica del panel del trabajador -->
+    <script src="trabajador.js"></script>
 
 </body>
 </html>

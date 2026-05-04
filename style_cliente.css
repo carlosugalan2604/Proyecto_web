@@ -1,0 +1,365 @@
+/*
+ * style_cliente.css — Panel del Cliente
+ * =======================================
+ * Estilos específicos del panel de historial de pedidos.
+ * Complementa style_dashboard.css (topbar, stats-row, etc.)
+ */
+
+/* ── BARRA DE FILTROS ──────────────────────────────────────────── */
+.filtros-cliente {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    flex-wrap: wrap;
+    margin-bottom: 16px;
+}
+
+.filtros-busqueda-cli {
+    position: relative;
+    flex: 1;
+    min-width: 200px;
+}
+
+.filtros-busqueda-cli i {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #94a3b8;
+    font-size: 0.82rem;
+}
+
+.filtros-busqueda-cli input {
+    width: 100%;
+    padding: 10px 14px 10px 34px;
+    border: 1.5px solid #e2e8f0;
+    border-radius: 10px;
+    font-size: 0.875rem;
+    font-family: 'Inter', sans-serif;
+    outline: none;
+    background: #ffffff;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.filtros-busqueda-cli input:focus {
+    border-color: #00CC99;
+    box-shadow: 0 0 0 3px rgba(0,204,153,0.1);
+}
+
+.filtros-botones-cli {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+}
+
+.filtro-btn-cli {
+    padding: 8px 16px;
+    border-radius: 20px;
+    border: 1.5px solid #e2e8f0;
+    background: #ffffff;
+    color: #64748b;
+    font-size: 0.8rem;
+    font-weight: 600;
+    font-family: 'Inter', sans-serif;
+    cursor: pointer;
+    transition: all 0.15s;
+}
+
+.filtro-btn-cli:hover { border-color: #00CC99; color: #00CC99; }
+.filtro-btn-cli.activo { background: #00CC99; border-color: #00CC99; color: white; }
+
+/* ── LISTA DE PEDIDOS ──────────────────────────────────────────── */
+.pedidos-lista {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+/*
+ * Tarjeta de pedido: diseño horizontal en dos zonas.
+ * .pedido-card-izq → información del pedido (id, fecha, resumen, estado)
+ * .pedido-card-der → importe, nº artículos, botón de detalle
+ */
+.pedido-card {
+    background: #ffffff;
+    border-radius: 14px;
+    padding: 20px 24px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 20px;
+    border-left: 4px solid #e2e8f0;
+    transition: box-shadow 0.2s, transform 0.15s;
+}
+
+.pedido-card:hover {
+    box-shadow: 0 4px 14px rgba(0,0,0,0.07);
+    transform: translateY(-1px);
+}
+
+/* Color del borde izquierdo según estado */
+.pedido-card:has(.estado-proceso)   { border-left-color: #f59e0b; }
+.pedido-card:has(.estado-entregado) { border-left-color: #22c55e; }
+.pedido-card:has(.estado-cancelado) { border-left-color: #ef4444; }
+
+.pedido-card-izq { flex: 1; }
+
+/* Cabecera: número y fecha del pedido */
+.pedido-num {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 8px;
+}
+
+.pedido-id {
+    font-size: 1rem;
+    font-weight: 800;
+    color: #0f172a;
+}
+
+.pedido-fecha {
+    font-size: 0.78rem;
+    color: #94a3b8;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+/* Nombres de productos del pedido */
+.pedido-resumen {
+    font-size: 0.82rem;
+    color: #64748b;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    line-height: 1.4;
+}
+
+.pedido-resumen i { color: #00CC99; }
+
+/* Badges de estado */
+.pedido-estado {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 12px;
+    border-radius: 20px;
+    font-size: 0.78rem;
+    font-weight: 700;
+}
+
+.estado-proceso   { background: #fffbeb; color: #b45309; }
+.estado-entregado { background: #f0fdf4; color: #166534; }
+.estado-cancelado { background: #fef2f2; color: #b91c1c; }
+
+/* Zona derecha de la tarjeta */
+.pedido-card-der {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 4px;
+    flex-shrink: 0;
+}
+
+.pedido-importe {
+    font-size: 1.3rem;
+    font-weight: 800;
+    color: #0f172a;
+}
+
+.pedido-nlineas {
+    font-size: 0.75rem;
+    color: #94a3b8;
+    margin-bottom: 6px;
+}
+
+.btn-ver-detalle {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    padding: 8px 16px;
+    background: none;
+    border: 1.5px solid #00CC99;
+    border-radius: 9px;
+    color: #00CC99;
+    font-size: 0.8rem;
+    font-weight: 700;
+    font-family: 'Inter', sans-serif;
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s;
+}
+
+.btn-ver-detalle:hover {
+    background: #00CC99;
+    color: white;
+}
+
+/* Estado vacío */
+.pedidos-vacio {
+    text-align: center;
+    padding: 60px 20px;
+    color: #94a3b8;
+}
+
+.pedidos-vacio i {
+    font-size: 3rem;
+    margin-bottom: 12px;
+    display: block;
+    opacity: 0.4;
+}
+
+.pedidos-vacio p {
+    font-size: 0.9rem;
+}
+
+/* ── MODAL DE DETALLE ──────────────────────────────────────────── */
+/*
+ * Modal específico del cliente (diferente del .modal del gerente
+ * para evitar conflictos de estilos al reutilizar style_dashboard.css).
+ */
+.modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(15,23,42,0.5);
+    z-index: 100;
+    backdrop-filter: blur(4px);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.25s;
+}
+
+.modal-overlay.modal-visible { opacity: 1; pointer-events: all; }
+
+.modal-cli {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -46%);
+    background: #ffffff;
+    border-radius: 16px;
+    width: 90%;
+    max-width: 560px;
+    max-height: 88vh;
+    overflow-y: auto;
+    z-index: 101;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.18);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.25s, transform 0.25s;
+}
+
+.modal-cli.modal-visible {
+    opacity: 1;
+    pointer-events: all;
+    transform: translate(-50%, -50%);
+}
+
+.modal-cli-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 18px 24px;
+    border-bottom: 1px solid #e2e8f0;
+    position: sticky;
+    top: 0;
+    background: #ffffff;
+    z-index: 1;
+}
+
+.modal-cli-header h3 {
+    font-size: 1rem;
+    font-weight: 700;
+    color: #0f172a;
+}
+
+.modal-cli-header button {
+    background: none;
+    border: none;
+    color: #94a3b8;
+    font-size: 1rem;
+    cursor: pointer;
+    padding: 4px 8px;
+    border-radius: 6px;
+    transition: background 0.15s;
+}
+
+.modal-cli-header button:hover { background: #f1f5f9; color: #0f172a; }
+
+.modal-cli-body {
+    padding: 20px 24px;
+}
+
+/* Estado dentro del modal */
+.detalle-estado {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+/* Tabla de líneas del pedido */
+.tabla-detalle {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 16px;
+}
+
+.tabla-detalle th {
+    padding: 10px 14px;
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    color: #94a3b8;
+    background: #f8fafc;
+    border-bottom: 1px solid #e2e8f0;
+    text-align: left;
+}
+
+.tabla-detalle td {
+    padding: 12px 14px;
+    font-size: 0.875rem;
+    color: #0f172a;
+    border-bottom: 1px solid #f1f5f9;
+}
+
+.tabla-detalle tfoot tr td {
+    border-bottom: none;
+    border-top: 2px solid #e2e8f0;
+    background: #f8fafc;
+}
+
+.tabla-detalle td code {
+    background: #f1f5f9;
+    padding: 2px 6px;
+    border-radius: 5px;
+    font-size: 0.75rem;
+    color: #475569;
+}
+
+/* Mensajes de estado al pie del modal */
+.detalle-mensaje {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 16px;
+    border-radius: 10px;
+    font-size: 0.83rem;
+    font-weight: 500;
+}
+
+.detalle-mensaje-en-proceso { background: #fffbeb; color: #92400e; border: 1px solid #fde68a; }
+.detalle-mensaje-entregado  { background: #f0fdf4; color: #14532d; border: 1px solid #bbf7d0; }
+.detalle-mensaje-cancelado  { background: #fef2f2; color: #7f1d1d; border: 1px solid #fecaca; }
+
+/* ── RESPONSIVE ────────────────────────────────────────────────── */
+@media (max-width: 600px) {
+    .pedido-card     { flex-direction: column; align-items: flex-start; }
+    .pedido-card-der { align-items: flex-start; width: 100%; flex-direction: row; justify-content: space-between; flex-wrap: wrap; }
+    .filtros-cliente { flex-direction: column; align-items: stretch; }
+}

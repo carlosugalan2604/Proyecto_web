@@ -1,127 +1,1427 @@
-/* Estilos generales */
+/*
+ * style.css — Estilos del panel del gerente (Dashboard principal)
+ * ================================================================
+ * Sistema de diseño moderno tipo SaaS.
+ * Usamos variables CSS (:root) para que sea fácil cambiar colores
+ * y tamaños desde un solo sitio sin tocar el resto del código.
+ */
+
+/* ══════════════════════════════════════════════════════════════════
+   RESET Y VARIABLES GLOBALES
+   ─────────────────────────────────────────────────────────────────
+   El reset elimina los márgenes y paddings que los navegadores
+   añaden por defecto a los elementos, para que todos empiecen igual.
+   box-sizing: border-box hace que el padding se incluya dentro del
+   ancho del elemento (más fácil de calcular tamaños).
+══════════════════════════════════════════════════════════════════ */
+*, *::before, *::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+/* Variables CSS: cambiando estos valores se actualiza todo el diseño */
+:root {
+    /* Colores principales de la marca DI-PYMES */
+    --verde-primario  : #00CC99;
+    --verde-oscuro    : #00a87f;
+
+    /* Colores del sidebar oscuro */
+    --sidebar-bg      : #0f172a;   /* Azul muy oscuro, da aspecto profesional */
+    --sidebar-hover   : rgba(255,255,255,0.07);
+    --sidebar-activo  : rgba(0, 204, 153, 0.15);
+    --sidebar-ancho   : 260px;     /* Ancho fijo del menú lateral */
+
+    /* Colores de fondo y superficies (tarjetas, modales, etc.) */
+    --fondo-app       : #f1f5f9;   /* Fondo gris claro de la página */
+    --superficie      : #ffffff;   /* Fondo blanco de las tarjetas */
+    --superficie-alt  : #f8fafc;
+
+    /* Colores de texto según importancia */
+    --texto-primario  : #0f172a;   /* Texto principal (muy oscuro) */
+    --texto-secundario: #64748b;   /* Texto secundario (gris medio) */
+    --texto-suave     : #94a3b8;   /* Texto suave (gris claro, para hints) */
+
+    /* Color de los bordes de los elementos */
+    --borde           : #e2e8f0;
+
+    /* Sombras de distintas intensidades para dar profundidad */
+    --sombra-sm : 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04); /* Sombra ligera */
+    --sombra-md : 0 4px 12px rgba(0,0,0,0.07);                              /* Sombra media */
+    --sombra-lg : 0 10px 30px rgba(0,0,0,0.08);                             /* Sombra fuerte */
+
+    /* Tipografía y bordes redondeados */
+    --fuente: 'Inter', 'Segoe UI', sans-serif;
+    --radio : 12px;   /* Border-radius estándar para las tarjetas */
+}
+
+/* Estilos base del body: fuente, fondo y layout flex horizontal */
 body {
-    margin: 0;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background-color: #f4f7f6;
-    display: flex;
-    height: 100vh;
+    font-family: var(--fuente);
+    background: var(--fondo-app);
+    color: var(--texto-primario);
+    min-height: 100vh;
+    display: flex; /* Sidebar a la izquierda y app-body a la derecha */
 }
 
-/* Menú lateral (Verde azulado) */
+/* ══════════════════════════════════════════════════════════════════
+   SIDEBAR — Menú lateral fijo
+   ─────────────────────────────────────────────────────────────────
+   El sidebar ocupa toda la altura de la pantalla y se queda fijo
+   aunque el usuario haga scroll en el contenido principal.
+   El .app-body tiene margin-left igual al ancho del sidebar para
+   que el contenido no quede tapado por el menú.
+══════════════════════════════════════════════════════════════════ */
+
+/* Contenedor principal del sidebar */
 .sidebar {
-    width: 260px;
-    background-color: #00CC99;
-    color: white;
-    padding: 20px;
-    box-sizing: border-box;
-    box-shadow: 2px 0 5px rgba(0,0,0,0.1);
-}
-
-.sidebar h2 {
-    margin-top: 10px;
-    margin-bottom: 40px;
-    font-weight: 300;
-    letter-spacing: 1px;
-    font-size: 28px;
-}
-
-.menu-item {
-    padding: 15px 10px;
-    margin-bottom: 10px;
-    border-radius: 5px;
-    cursor: pointer;
-    transition: background 0.3s;
-    font-size: 16px;
-}
-
-.menu-item:hover, .menu-item.active {
-    background-color: rgba(255, 255, 255, 0.2);
-    font-weight: bold;
-}
-
-/* Contenido principal */
-.main-content {
-    flex: 1;
-    padding: 40px;
-    overflow-y: auto;
-    box-sizing: border-box;
-}
-
-.header {
+    width: var(--sidebar-ancho);
+    height: 100vh;             /* Ocupa toda la altura de la ventana */
+    background: var(--sidebar-bg);
+    position: fixed;           /* Fijo: no se mueve al hacer scroll */
+    top: 0;
+    left: 0;
     display: flex;
-    justify-content: space-between;
+    flex-direction: column;    /* Logo arriba, nav en el medio, logout abajo */
+    padding: 0;
+    z-index: 100;              /* Por encima del contenido principal */
+    overflow-y: auto;          /* Scroll si hay muchos elementos de menú */
+    overflow-x: hidden;
+    transition: transform 0.3s ease; /* Para el slide en móvil */
+}
+
+/* Bloque superior del sidebar: logo del sidebar y nombre de la app */
+.sidebar-brand {
+    display: flex;
     align-items: center;
-    margin-bottom: 40px;
-    color: #333;
+    gap: 12px;
+    padding: 24px 20px 20px;
+    border-bottom: 1px solid rgba(255,255,255,0.06); /* Línea separadora sutil */
 }
 
-/* Tarjetas de resumen (Widgets) */
-.cards-container {
+/* Cuadrado verde con el icono de edificio */
+.sidebar-logo {
+    width: 36px;
+    height: 36px;
+    background: var(--verde-primario);
+    border-radius: 10px;
     display: flex;
-    gap: 20px;
-    margin-bottom: 40px;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 1rem;
+    box-shadow: 0 0 16px rgba(0,204,153,0.4); /* Brillo verde alrededor del logo */
+    flex-shrink: 0;
 }
 
-.card {
-    background-color: white;
-    padding: 25px;
+/* Texto "DI-PYMES" en blanco junto al logo */
+.sidebar-title {
+    font-size: 1.1rem;
+    font-weight: 800;
+    color: white;
+    letter-spacing: 1.5px;
+}
+
+/* Bloque del perfil del usuario logueado (avatar + nombre + email) */
+.sidebar-perfil {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 16px 20px;
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+
+/* Avatar circular con las iniciales del usuario */
+.sidebar-avatar {
+    width: 38px;
+    height: 38px;
+    background: linear-gradient(135deg, var(--verde-primario), var(--verde-oscuro));
+    border-radius: 50%;        /* Círculo perfecto */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: white;
+    flex-shrink: 0;
+}
+
+/* Zona de texto del perfil (nombre + email) */
+.sidebar-info {
+    overflow: hidden; /* Evita que el texto largo desborde */
+}
+
+/* Nombre del usuario en el sidebar */
+.sidebar-nombre {
+    font-size: 0.88rem;
+    font-weight: 600;
+    color: white;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis; /* Si el nombre es muy largo muestra "..." */
+}
+
+/* Email del usuario en el sidebar (más pequeño y en gris) */
+.sidebar-email {
+    font-size: 0.72rem;
+    color: var(--texto-suave);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Etiqueta de sección "MENÚ PRINCIPAL" encima de los ítems de navegación */
+.sidebar-seccion-label {
+    font-size: 0.65rem;
+    font-weight: 700;
+    color: var(--texto-suave);
+    letter-spacing: 1.2px;
+    padding: 20px 20px 8px;
+    text-transform: uppercase;
+}
+
+/* Contenedor de los ítems de navegación */
+.sidebar-nav {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding: 0 10px;
+    flex: 1; /* Ocupa el espacio sobrante entre el perfil y el botón de logout */
+}
+
+/* Cada ítem de navegación del sidebar */
+/* Son elementos <a> sin href porque la navegación la gestiona JS */
+.nav-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 11px 14px;
     border-radius: 10px;
-    flex: 1;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.03);
-    border-left: 5px solid #00CC99;
+    color: rgba(255,255,255,0.6); /* Texto semitransparente cuando no está activo */
+    font-size: 0.875rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s;
+    text-decoration: none;
+    user-select: none;       /* Evita que se seleccione el texto al hacer clic */
+    position: relative;
 }
 
-.card h3 {
-    margin: 0 0 10px 0;
-    color: #666;
-    font-size: 16px;
-    font-weight: normal;
+/* Al pasar el ratón, fondo semitransparente y texto más claro */
+.nav-item:hover {
+    background: var(--sidebar-hover);
+    color: rgba(255,255,255,0.9);
 }
 
-.card .value {
-    margin: 0;
-    font-size: 28px;
-    font-weight: bold;
-    color: #333;
-}
-
-/* Tablas de datos */
-.table-section {
-    background-color: white;
-    padding: 25px;
-    border-radius: 10px;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.03);
-}
-
-.table-section h3 {
-    margin-top: 0;
-    color: #333;
-    margin-bottom: 20px;
-}
-
-table {
-    width: 100%;
-    border-collapse: collapse;
-}
-
-th, td {
-    text-align: left;
-    padding: 15px;
-    border-bottom: 1px solid #eee;
-}
-
-th {
-    background-color: #f9fafb;
-    color: #555;
+/* Ítem activo (la sección que se está viendo): fondo verde claro y texto verde */
+.nav-item.active {
+    background: var(--sidebar-activo);
+    color: var(--verde-primario);
     font-weight: 600;
 }
 
-.badge {
-    padding: 5px 10px;
-    border-radius: 20px;
-    font-size: 12px;
-    font-weight: bold;
+/* El icono del ítem activo también se pone verde */
+.nav-item.active .nav-icono {
+    color: var(--verde-primario);
 }
 
-.badge-warning { background-color: #fff3cd; color: #856404; }
-.badge-success { background-color: #d4edda; color: #155724; }
+/* Icono de cada ítem del menú (tamaño fijo para alineación) */
+.nav-icono {
+    width: 16px;
+    text-align: center;
+    font-size: 0.9rem;
+    flex-shrink: 0;
+}
+
+/* Badges numéricos en los ítems del menú (ej: "3 alertas" en stock) */
+/* Se posicionan al final de la fila con margin-left: auto */
+.nav-badge {
+    margin-left: auto;
+    padding: 2px 8px;
+    border-radius: 20px;
+    font-size: 0.7rem;
+    font-weight: 700;
+}
+
+/* Badge rojo (para alertas de stock) */
+.nav-badge-peligro { background: rgba(239,68,68,0.2);  color: #f87171; }
+/* Badge amarillo (para tareas pendientes) */
+.nav-badge-aviso   { background: rgba(245,158,11,0.2); color: #fbbf24; }
+
+/* Botón de cerrar sesión al pie del sidebar */
+.btn-logout {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 10px;
+    padding: 12px 14px;
+    border: none;
+    background: rgba(239,68,68,0.08); /* Fondo rojo muy suave */
+    border-radius: 10px;
+    color: #f87171;                   /* Texto rojo claro */
+    font-size: 0.875rem;
+    font-weight: 600;
+    font-family: var(--fuente);
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s;
+    width: calc(100% - 20px);        /* Ancho del sidebar menos el margen */
+}
+
+/* Al pasar el ratón, fondo rojo más intenso */
+.btn-logout:hover {
+    background: rgba(239,68,68,0.18);
+    color: #fca5a5;
+}
+
+/* ══════════════════════════════════════════════════════════════════
+   APP BODY — Zona de contenido a la derecha del sidebar
+   ─────────────────────────────────────────────────────────────────
+   Tiene un margin-left igual al ancho del sidebar para que el
+   contenido no quede tapado por el menú lateral (que es fixed).
+══════════════════════════════════════════════════════════════════ */
+
+/* Contenedor principal del contenido (topbar + secciones) */
+.app-body {
+    margin-left: var(--sidebar-ancho); /* Espacio para el sidebar fijo */
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+/* ── TOPBAR — Barra superior del panel ─────────────────────────── */
+/* Se queda pegada arriba al hacer scroll (position: sticky) */
+.topbar {
+    height: 64px;
+    background: var(--superficie);
+    border-bottom: 1px solid var(--borde);
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 0 28px;
+    position: sticky;  /* Se pega arriba cuando el usuario hace scroll */
+    top: 0;
+    z-index: 50;       /* Por encima del contenido pero debajo del sidebar */
+    box-shadow: var(--sombra-sm);
+}
+
+/* Botón hamburguesa (tres rayas): solo visible en móvil para abrir el sidebar */
+.btn-hamburguesa {
+    display: none; /* Oculto en escritorio */
+    background: none;
+    border: none;
+    font-size: 1.2rem;
+    color: var(--texto-secundario);
+    cursor: pointer;
+    padding: 6px;
+    border-radius: 8px;
+}
+
+.btn-hamburguesa:hover {
+    background: var(--fondo-app);
+    color: var(--texto-primario);
+}
+
+/* Barra de búsqueda del topbar */
+.topbar-busqueda {
+    flex: 1;
+    max-width: 400px;
+    position: relative; /* Para el icono de lupa posicionado dentro */
+}
+
+/* Input de la búsqueda global */
+.topbar-busqueda input {
+    width: 100%;
+    padding: 9px 14px 9px 38px; /* padding-left extra para el icono de lupa */
+    border: 1.5px solid var(--borde);
+    border-radius: 10px;
+    font-size: 0.875rem;
+    font-family: var(--fuente);
+    color: var(--texto-primario);
+    background: var(--fondo-app);
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+/* Al enfocar el input, borde verde y sombra verde suave */
+.topbar-busqueda input:focus {
+    border-color: var(--verde-primario);
+    box-shadow: 0 0 0 3px rgba(0,204,153,0.12);
+    background: var(--superficie);
+}
+
+/* Icono de lupa dentro de la barra de búsqueda */
+.topbar-busqueda-icono {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%); /* Centrado verticalmente */
+    color: var(--texto-suave);
+    font-size: 0.85rem;
+}
+
+/* Zona de acciones del lado derecho del topbar (campana + avatar) */
+.topbar-acciones {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-left: auto; /* Empuja todo hacia la derecha */
+}
+
+/* Botón icono genérico (cuadrado redondeado para iconos como la campana) */
+.btn-icono {
+    width: 38px;
+    height: 38px;
+    border-radius: 10px;
+    border: none;
+    background: var(--fondo-app);
+    color: var(--texto-secundario);
+    font-size: 1rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative; /* Para el punto rojo de notificación */
+    transition: background 0.15s, color 0.15s;
+}
+
+.btn-icono:hover {
+    background: var(--borde);
+    color: var(--texto-primario);
+}
+
+/* Punto rojo en la esquina de la campana: indica notificaciones no leídas */
+.notif-dot {
+    width: 8px;
+    height: 8px;
+    background: #ef4444;
+    border-radius: 50%;
+    border: 2px solid var(--superficie); /* Borde blanco para separarlo del icono */
+    position: absolute;
+    top: 4px;
+    right: 4px;
+}
+
+/* ── PANEL DE NOTIFICACIONES ────────────────────────────────────── */
+/* Panel desplegable que aparece al pulsar la campana */
+/* Empieza oculto y se muestra al añadir la clase .abierto */
+.notif-wrapper {
+    position: relative; /* Para que el panel se posicione respecto a este contenedor */
+}
+
+.notif-panel {
+    position: absolute;
+    top: calc(100% + 10px); /* Debajo del botón con un pequeño espacio */
+    right: 0;               /* Alineado a la derecha del botón */
+    width: 320px;
+    background: var(--superficie);
+    border: 1px solid var(--borde);
+    border-radius: var(--radio);
+    box-shadow: var(--sombra-lg);
+    opacity: 0;             /* Invisible por defecto */
+    pointer-events: none;   /* No recibe clics cuando está oculto */
+    transform: translateY(-6px); /* Un poco arriba de su posición final */
+    transition: opacity 0.2s, transform 0.2s;
+    z-index: 200;
+}
+
+/* Clase que activa el panel: lo hace visible con transición suave */
+.notif-panel.abierto {
+    opacity: 1;
+    pointer-events: all;
+    transform: translateY(0); /* Vuelve a su posición normal */
+}
+
+/* Cabecera del panel de notificaciones */
+.notif-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 14px 16px;
+    border-bottom: 1px solid var(--borde);
+    font-size: 0.875rem;
+}
+
+/* Botón de texto "Marcar todo leído" */
+.btn-link {
+    background: none;
+    border: none;
+    color: var(--verde-primario);
+    font-size: 0.78rem;
+    font-family: var(--fuente);
+    cursor: pointer;
+    font-weight: 600;
+}
+
+/* Lista de notificaciones con scroll si hay muchas */
+.notif-lista {
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+/* Cada ítem de notificación */
+.notif-item {
+    display: flex;
+    gap: 12px;
+    padding: 12px 16px;
+    cursor: pointer;
+    transition: background 0.15s;
+}
+
+/* Hover en la notificación */
+.notif-item:hover          { background: var(--fondo-app); }
+/* Fondo verde muy suave para las notificaciones no leídas */
+.notif-no-leida            { background: rgba(0,204,153,0.05); }
+
+/* Icono de la notificación (cuadrado redondeado de color) */
+.notif-icono {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.8rem;
+    flex-shrink: 0;
+}
+
+/* Texto de la notificación */
+.notif-detalle p    { font-size: 0.825rem; color: var(--texto-primario); line-height: 1.4; }
+/* Hora de la notificación (más pequeña y en gris) */
+.notif-detalle span { font-size: 0.73rem;  color: var(--texto-suave);    }
+
+/* Bloque de perfil en el topbar (avatar + nombre del gerente) */
+.topbar-perfil {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    padding: 6px 12px 6px 6px;
+    border-radius: 10px;
+    border: 1px solid var(--borde);
+    cursor: default;
+}
+
+/* Avatar cuadrado con las iniciales del gerente en el topbar */
+.topbar-avatar {
+    width: 30px;
+    height: 30px;
+    background: linear-gradient(135deg, var(--verde-primario), var(--verde-oscuro));
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: white;
+}
+
+/* Nombre del gerente junto al avatar */
+#topbarNombre {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--texto-primario);
+}
+
+/* ── ÁREA DE CONTENIDO DE PÁGINA ─────────────────────────────────── */
+/* Zona donde se muestran las distintas secciones del panel */
+.page-content {
+    flex: 1;
+    padding: 28px 32px;
+    overflow-y: auto;
+}
+
+/* Cabecera de cada sección: título a la izquierda, botón a la derecha */
+.page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 24px;
+}
+
+/* Título grande de la sección (ej: "Gestión de Stock") */
+.page-titulo {
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: var(--texto-primario);
+    margin-bottom: 4px;
+}
+
+/* Subtítulo pequeño debajo del título */
+.page-subtitulo {
+    font-size: 0.875rem;
+    color: var(--texto-secundario);
+}
+
+/* ══════════════════════════════════════════════════════════════════
+   KPI GRID — 4 tarjetas de métricas en fila
+   ─────────────────────────────────────────────────────────────────
+   En pantallas grandes muestra 4 columnas.
+   En tableta baja a 2 y en móvil a 1 (ver responsive abajo).
+══════════════════════════════════════════════════════════════════ */
+.kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr); /* 4 columnas iguales */
+    gap: 16px;
+    margin-bottom: 24px;
+}
+
+/* Tarjeta de KPI individual */
+.kpi-card {
+    background: var(--superficie);
+    border-radius: var(--radio);
+    padding: 20px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    box-shadow: var(--sombra-sm);
+    border-top: 3px solid transparent; /* El color se asigna por clase (azul, rojo, etc.) */
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+/* Al pasar el ratón, la tarjeta sube un poco */
+.kpi-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--sombra-md);
+}
+
+/* Colores del borde superior que identifican cada tipo de KPI */
+.kpi-azul   { border-top-color: #3b82f6; } /* Azul para ingresos */
+.kpi-naranja{ border-top-color: #f59e0b; } /* Naranja para tareas */
+.kpi-rojo   { border-top-color: #ef4444; } /* Rojo para alertas */
+.kpi-verde  { border-top-color: var(--verde-primario); } /* Verde para pedidos */
+
+/* Cuadrado con el icono del KPI */
+.kpi-icono-wrapper {
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.1rem;
+    flex-shrink: 0;
+}
+
+/* Colores del icono según el tipo de KPI */
+.kpi-azul    .kpi-icono-wrapper { background: #eff6ff; color: #3b82f6; }
+.kpi-naranja .kpi-icono-wrapper { background: #fffbeb; color: #f59e0b; }
+.kpi-rojo    .kpi-icono-wrapper { background: #fef2f2; color: #ef4444; }
+.kpi-verde   .kpi-icono-wrapper { background: #f0fdf4; color: var(--verde-primario); }
+
+/* Etiqueta pequeña encima del valor (ej: "TAREAS PENDIENTES") */
+.kpi-etiqueta {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--texto-secundario);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 4px;
+}
+
+/* Número principal del KPI (el más grande, animado con JS) */
+.kpi-valor {
+    font-size: 1.55rem;
+    font-weight: 800;
+    color: var(--texto-primario);
+    line-height: 1;
+    margin-bottom: 6px;
+}
+
+/* Tendencia debajo del valor (flecha y porcentaje) */
+.kpi-tendencia {
+    font-size: 0.73rem;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+/* Tendencia positiva en verde (subida) */
+.tendencia-positiva { color: #10b981; }
+/* Tendencia negativa en rojo (bajada o alerta) */
+.tendencia-negativa { color: #ef4444; }
+
+/* ══════════════════════════════════════════════════════════════════
+   GRID INFERIOR DEL DASHBOARD
+   ─────────────────────────────────────────────────────────────────
+   Dos columnas: tabla de inventario crítico (más ancha) a la izquierda
+   y panel de actividad reciente (más estrecha) a la derecha.
+══════════════════════════════════════════════════════════════════ */
+.bottom-grid {
+    display: grid;
+    grid-template-columns: 1fr 340px; /* Columna flexible + columna fija de 340px */
+    gap: 16px;
+}
+
+/* Tarjeta de panel genérica (contenedor blanco con sombra suave) */
+.panel-card {
+    background: var(--superficie);
+    border-radius: var(--radio);
+    box-shadow: var(--sombra-sm);
+    overflow: hidden; /* Las esquinas redondeadas también se aplican al contenido */
+}
+
+/* Cabecera de la tarjeta de panel: título a la izquierda + botón a la derecha */
+.panel-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 18px 20px;
+    border-bottom: 1px solid var(--borde);
+}
+
+/* Título de la cabecera del panel (con icono verde) */
+.panel-card-header h3 {
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: var(--texto-primario);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+/* El icono del título siempre en verde */
+.panel-card-header h3 i {
+    color: var(--verde-primario);
+}
+
+/* Botón "Ver todo →" en verde sin fondo */
+.btn-ver-todo {
+    background: none;
+    border: none;
+    color: var(--verde-primario);
+    font-size: 0.8rem;
+    font-weight: 600;
+    font-family: var(--fuente);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: opacity 0.15s;
+}
+
+.btn-ver-todo:hover { opacity: 0.75; }
+
+/* Wrapper con scroll horizontal para las tablas en pantallas pequeñas */
+.tabla-wrapper {
+    overflow-x: auto;
+}
+
+/* ══════════════════════════════════════════════════════════════════
+   TABLA — Estilos para todas las tablas del panel
+══════════════════════════════════════════════════════════════════ */
+
+/* La tabla ocupa todo el ancho disponible */
+table {
+    width: 100%;
+    border-collapse: collapse; /* Elimina el espacio entre celdas */
+}
+
+/* Cabecera de la tabla: fondo gris claro y texto en mayúsculas pequeñas */
+th {
+    padding: 11px 16px;
+    text-align: left;
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--texto-suave);
+    background: var(--fondo-app);
+    border-bottom: 1px solid var(--borde);
+}
+
+/* Celdas de datos */
+td {
+    padding: 13px 16px;
+    font-size: 0.875rem;
+    color: var(--texto-primario);
+    border-bottom: 1px solid var(--borde);
+    vertical-align: middle; /* Centra el contenido verticalmente */
+}
+
+/* La última fila no tiene borde inferior */
+tr:last-child td  { border-bottom: none; }
+/* Al pasar el ratón por una fila, fondo gris claro */
+tr:hover td       { background: var(--fondo-app); }
+
+/* Clase para texto secundario gris en tablas */
+.texto-gris { color: var(--texto-secundario); font-size: 0.82rem; }
+
+/* Código de referencia con fondo gris y borde */
+td code {
+    background: var(--fondo-app);
+    border: 1px solid var(--borde);
+    padding: 2px 7px;
+    border-radius: 6px;
+    font-size: 0.78rem;
+    font-family: 'Courier New', monospace;
+}
+
+/* Celda de stock con número + barra de progreso debajo */
+.stock-cell {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    font-size: 0.85rem;
+    min-width: 80px;
+}
+
+/* Barra de fondo (gris) */
+.stock-bar {
+    height: 4px;
+    background: var(--borde);
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+/* Relleno de la barra (el color y el ancho los pone el JS con style inline) */
+.stock-bar-fill {
+    height: 100%;
+    border-radius: 4px;
+    transition: width 0.6s ease; /* Animación suave al cambiar el porcentaje */
+}
+
+/* ══════════════════════════════════════════════════════════════════
+   BADGES — Etiquetas de estado (Óptimo, Bajo Stock, Agotado, etc.)
+══════════════════════════════════════════════════════════════════ */
+.badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 4px 10px;
+    border-radius: 20px;     /* Forma de píldora */
+    font-size: 0.73rem;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+/* Badge rojo para estados de peligro (agotado, cancelado) */
+.badge-peligro { background: #fef2f2; color: #b91c1c; }
+/* Badge amarillo para advertencias (bajo stock) */
+.badge-aviso   { background: #fffbeb; color: #b45309; }
+/* Badge verde para estados correctos (óptimo, entregado) */
+.badge-ok      { background: #f0fdf4; color: #166534; }
+
+/* ══════════════════════════════════════════════════════════════════
+   ACTIVIDAD RECIENTE — Lista de eventos del negocio
+══════════════════════════════════════════════════════════════════ */
+.actividad-lista {
+    list-style: none;
+    padding: 8px 0;
+}
+
+/* Cada ítem de actividad: icono de color + texto + hora */
+.actividad-item {
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+    padding: 12px 20px;
+    transition: background 0.15s;
+}
+
+/* Al pasar el ratón, fondo gris claro */
+.actividad-item:hover { background: var(--fondo-app); }
+
+/* Cuadrado con el icono del tipo de actividad */
+.actividad-icono {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.78rem;
+    flex-shrink: 0;
+    margin-top: 2px;
+}
+
+/* Colores de los iconos de actividad (verde, rojo, naranja, azul) */
+.act-verde   { background: #f0fdf4; color: #16a34a; }
+.act-rojo    { background: #fef2f2; color: #dc2626; }
+.act-naranja { background: #fffbeb; color: #d97706; }
+.act-azul    { background: #eff6ff; color: #2563eb; }
+
+/* Texto de la actividad */
+.actividad-detalle p {
+    font-size: 0.83rem;
+    color: var(--texto-primario);
+    line-height: 1.4;
+    margin-bottom: 3px;
+}
+
+/* Hora de la actividad en gris */
+.actividad-hora {
+    font-size: 0.73rem;
+    color: var(--texto-suave);
+}
+
+/* ══════════════════════════════════════════════════════════════════
+   RESPONSIVE — Adaptación a distintos tamaños de pantalla
+══════════════════════════════════════════════════════════════════ */
+
+/* Tableta: ancho < 1200px */
+@media (max-width: 1200px) {
+    /* Los KPIs pasan de 4 columnas a 2 columnas */
+    .kpi-grid    { grid-template-columns: repeat(2, 1fr); }
+    /* El grid inferior pasa a una sola columna */
+    .bottom-grid { grid-template-columns: 1fr; }
+    /* El panel de actividad se oculta en tableta para ahorrar espacio */
+    .panel-actividad { display: none; }
+}
+
+/* Móvil: ancho < 960px */
+@media (max-width: 960px) {
+    /* El sidebar se sale de la pantalla hacia la izquierda */
+    .sidebar {
+        transform: translateX(-100%);
+    }
+
+    /* Cuando el JS añade .sidebar-abierto, el sidebar vuelve a la vista */
+    .sidebar.sidebar-abierto {
+        transform: translateX(0);
+    }
+
+    /* El contenido ocupa toda la pantalla (no hay sidebar que empujar) */
+    .app-body {
+        margin-left: 0;
+    }
+
+    /* Se muestra el botón hamburguesa que antes estaba oculto */
+    .btn-hamburguesa { display: flex; }
+
+    /* Menos padding en móvil */
+    .page-content { padding: 20px 16px; }
+    .kpi-grid     { grid-template-columns: repeat(2, 1fr); gap: 12px; }
+
+    /* El buscador se hace más pequeño en móvil */
+    .topbar-busqueda { max-width: 200px; }
+}
+
+/* Móvil pequeño: ancho < 480px */
+@media (max-width: 480px) {
+    /* Los KPIs pasan a una sola columna */
+    .kpi-grid { grid-template-columns: 1fr; }
+    /* En pantallas muy pequeñas se oculta la barra de búsqueda */
+    .topbar-busqueda { display: none; }
+}
+
+/* ══════════════════════════════════════════════════════════════════
+   ESTILOS ADICIONALES — Stock, Tareas, Trabajadores, Finanzas, Modales
+══════════════════════════════════════════════════════════════════ */
+
+/* ── BARRA DE FILTROS — Buscador + botones de filtro ──────────── */
+/* Usada en las secciones de stock y tareas */
+.filtros-bar {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    flex-wrap: wrap; /* En móvil se apilan */
+}
+
+/* Contenedor del buscador con el icono de lupa dentro */
+.filtros-busqueda {
+    position: relative;
+    flex: 1;
+    min-width: 220px;
+}
+
+/* Icono de lupa posicionado dentro del input */
+.filtros-busqueda i {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--texto-suave);
+    font-size: 0.82rem;
+}
+
+/* Input de búsqueda */
+.filtros-busqueda input {
+    width: 100%;
+    padding: 10px 14px 10px 34px;
+    border: 1.5px solid var(--borde);
+    border-radius: 10px;
+    font-size: 0.875rem;
+    font-family: var(--fuente);
+    outline: none;
+    background: var(--superficie);
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+/* Al enfocar el input de búsqueda */
+.filtros-busqueda input:focus {
+    border-color: var(--verde-primario);
+    box-shadow: 0 0 0 3px rgba(0,204,153,0.1);
+}
+
+/* Contenedor de los botones de filtro */
+.filtros-botones { display: flex; gap: 6px; flex-wrap: wrap; }
+
+/* Botón de filtro individual (píldora con borde) */
+.filtro-btn {
+    padding: 8px 16px;
+    border-radius: 20px;
+    border: 1.5px solid var(--borde);
+    background: var(--superficie);
+    color: var(--texto-secundario);
+    font-size: 0.8rem;
+    font-weight: 600;
+    font-family: var(--fuente);
+    cursor: pointer;
+    transition: all 0.15s;
+}
+
+/* Hover: borde y texto en verde */
+.filtro-btn:hover { border-color: var(--verde-primario); color: var(--verde-primario); }
+/* Filtro activo: fondo verde sólido con texto blanco */
+.filtro-btn.activo { background: var(--verde-primario); border-color: var(--verde-primario); color: white; }
+
+/* ── MENSAJE DE TABLA VACÍA ─────────────────────────────────────── */
+/* Se muestra cuando no hay resultados tras aplicar un filtro */
+.tabla-vacia {
+    text-align: center;
+    padding: 36px 16px;
+    color: var(--texto-suave);
+    font-size: 0.875rem;
+}
+
+/* ── ACCIONES EN CELDA DE TABLA — botones editar/eliminar ──────── */
+/* Contenedor de los dos botones en la columna de acciones */
+.acciones-celda { display: flex; gap: 6px; }
+
+/* Botón de acción genérico (cuadrado pequeño) */
+.btn-accion-tabla {
+    width: 30px;
+    height: 30px;
+    border-radius: 7px;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.75rem;
+    transition: background 0.15s;
+}
+
+/* Botón editar: azul claro */
+.btn-editar          { background: #eff6ff; color: #3b82f6; }
+.btn-editar:hover    { background: #dbeafe; }
+/* Botón eliminar: rojo claro */
+.btn-eliminar        { background: #fef2f2; color: #ef4444; }
+.btn-eliminar:hover  { background: #fee2e2; }
+
+/* Badge azul para estado "En Progreso" */
+.badge-info    { background: #eff6ff; color: #1d4ed8; }
+/* Badge gris para trabajadores inactivos */
+.badge-inactivo{ background: #f1f5f9; color: #94a3b8; }
+
+/* ══════════════════════════════════════════════════════════════════
+   TARJETAS KANBAN DE TAREAS
+   ─────────────────────────────────────────────────────────────────
+   Grid de tarjetas que se adapta automáticamente al ancho disponible.
+   Cada tarjeta representa una tarea del equipo.
+══════════════════════════════════════════════════════════════════ */
+
+/* Grid con columnas mínimas de 280px que se añaden automáticamente */
+.tareas-equipo-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 14px;
+    margin-top: 16px;
+}
+
+/* Tarjeta individual de tarea */
+.tarea-card {
+    background: var(--superficie);
+    border-radius: var(--radio);
+    padding: 16px;
+    box-shadow: var(--sombra-sm);
+    border-left: 3px solid var(--borde); /* Línea de color a la izquierda */
+    transition: box-shadow 0.2s, transform 0.2s;
+}
+
+/* Hover: sube un poco y sombra más pronunciada */
+.tarea-card:hover { box-shadow: var(--sombra-md); transform: translateY(-1px); }
+
+/* Cabecera de la tarjeta: badge de estado + botones de acciones */
+.tarea-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+/* Contenedor de los botones de editar y eliminar de la tarjeta */
+.tarea-card-acciones { display: flex; gap: 4px; }
+/* Título de la tarea en negrita */
+.tarea-card-titulo   { font-size: 0.92rem; font-weight: 700; color: var(--texto-primario); margin-bottom: 6px; }
+/* Descripción de la tarea en gris */
+.tarea-card-desc     { font-size: 0.78rem; color: var(--texto-secundario); line-height: 1.5; margin-bottom: 12px; }
+
+/* Pie de la tarjeta: trabajador a la izquierda, fecha a la derecha */
+.tarea-card-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+/* Nombre del trabajador con su avatar mini */
+.tarea-card-trabajador {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    font-size: 0.78rem;
+    color: var(--texto-secundario);
+}
+
+/* Avatar pequeño con las iniciales del trabajador */
+.avatar-mini {
+    width: 24px;
+    height: 24px;
+    border-radius: 6px;
+    background: linear-gradient(135deg, var(--verde-primario), var(--verde-oscuro));
+    color: white;
+    font-size: 0.6rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Fecha de la tarea (pequeña y en gris) */
+.tarea-card-fecha { font-size: 0.72rem; color: var(--texto-suave); display: flex; align-items: center; gap: 4px; }
+
+/* Select para cambiar el estado directamente desde la tarjeta */
+.tarea-estado-select {
+    width: 100%;
+    padding: 7px 10px;
+    border: 1.5px solid var(--borde);
+    border-radius: 8px;
+    font-size: 0.78rem;
+    font-family: var(--fuente);
+    color: var(--texto-primario);
+    background: var(--fondo-app);
+    cursor: pointer;
+    outline: none;
+}
+
+/* Al enfocar el select, borde verde */
+.tarea-estado-select:focus { border-color: var(--verde-primario); }
+
+/* ══════════════════════════════════════════════════════════════════
+   TARJETAS DE TRABAJADORES
+   ─────────────────────────────────────────────────────────────────
+   Grid similar al de tareas pero con tarjetas más anchas (300px mín).
+══════════════════════════════════════════════════════════════════ */
+
+/* Grid de tarjetas de trabajadores */
+.trabajadores-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 16px;
+}
+
+/* Tarjeta de trabajador: avatar + info + acciones en fila horizontal */
+.trabajador-card {
+    background: var(--superficie);
+    border-radius: var(--radio);
+    padding: 20px;
+    box-shadow: var(--sombra-sm);
+    display: flex;
+    gap: 16px;
+    align-items: flex-start;
+    transition: box-shadow 0.2s;
+}
+
+.trabajador-card:hover   { box-shadow: var(--sombra-md); }
+/* Los trabajadores inactivos aparecen con menos opacidad (más apagados) */
+.trabajador-inactivo     { opacity: 0.55; }
+
+/* Avatar grande con las iniciales del trabajador */
+.trabajador-avatar {
+    width: 48px;
+    height: 48px;
+    border-radius: 14px;
+    background: linear-gradient(135deg, var(--verde-primario), var(--verde-oscuro));
+    color: white;
+    font-size: 1rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+/* Zona de información del trabajador */
+.trabajador-info { flex: 1; }
+.trabajador-info h4 { font-size: 0.95rem; font-weight: 700; color: var(--texto-primario); margin-bottom: 4px; }
+
+/* Email del trabajador */
+.trabajador-email {
+    font-size: 0.78rem;
+    color: var(--texto-secundario);
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+/* Meta-información (tareas activas, turno) */
+.trabajador-meta { display: flex; flex-wrap: wrap; gap: 10px; }
+.trabajador-meta span { font-size: 0.75rem; color: var(--texto-suave); display: flex; align-items: center; gap: 4px; }
+/* Los iconos de la meta en verde */
+.trabajador-meta i    { color: var(--verde-primario); }
+/* Zona de acciones: badge de estado + botones editar/eliminar */
+.trabajador-acciones  { display: flex; flex-direction: column; align-items: flex-end; }
+
+/* ══════════════════════════════════════════════════════════════════
+   GRÁFICO DE BARRAS CSS — En la sección de finanzas
+   ─────────────────────────────────────────────────────────────────
+   Las barras se generan dinámicamente con JS.
+   Su altura (en %) se calcula como porcentaje del valor máximo.
+══════════════════════════════════════════════════════════════════ */
+
+/* Contenedor del gráfico */
+.grafico-barras { padding: 16px 20px 8px; }
+
+/* Fila de barras: flex para que se distribuyan uniformemente */
+.barras-container {
+    display: flex;
+    align-items: flex-end; /* Las barras crecen desde abajo */
+    justify-content: space-between;
+    height: 180px;         /* Altura total del gráfico */
+    gap: 8px;
+    padding: 0 4px;
+}
+
+/* Columna individual: valor arriba, barra en el medio, mes abajo */
+.barra-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    flex: 1;
+    height: 100%;
+    justify-content: flex-end;
+    gap: 4px;
+}
+
+/* Valor en euros encima de la barra */
+.barra-valor { font-size: 0.62rem; color: var(--texto-suave); font-weight: 600; }
+
+/* Zona donde está la barra (ocupa el espacio disponible) */
+.barra-wrap {
+    width: 100%;
+    flex: 1;
+    display: flex;
+    align-items: flex-end; /* La barra crece desde abajo */
+}
+
+/* La barra en sí (su height lo pone el JS con style inline) */
+.barra-fill {
+    width: 100%;
+    background: var(--borde); /* Gris por defecto */
+    border-radius: 4px 4px 0 0; /* Bordes redondeados solo arriba */
+    transition: height 0.8s ease; /* Animación suave al cargar */
+    min-height: 4px;
+}
+
+/* La barra del mes actual se pinta en verde con brillo */
+.barra-activa { background: var(--verde-primario) !important; box-shadow: 0 0 10px rgba(0,204,153,0.35); }
+/* Etiqueta del mes debajo de la barra */
+.barra-mes    { font-size: 0.72rem; color: var(--texto-secundario); font-weight: 500; }
+
+/* ══════════════════════════════════════════════════════════════════
+   BOTÓN DE ACCIÓN PRINCIPAL — "+ Nuevo Producto", "+ Nueva Tarea", etc.
+══════════════════════════════════════════════════════════════════ */
+.btn-accion-principal {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 11px 20px;
+    background: var(--verde-primario);
+    color: white;
+    border: none;
+    border-radius: 10px;
+    font-size: 0.875rem;
+    font-weight: 700;
+    font-family: var(--fuente);
+    cursor: pointer;
+    transition: background 0.2s, transform 0.1s;
+    box-shadow: 0 3px 10px rgba(0,204,153,0.3); /* Sombra verde */
+    flex-shrink: 0;
+}
+
+/* Al hover, oscurece el verde y sube un poco */
+.btn-accion-principal:hover { background: var(--verde-oscuro); transform: translateY(-1px); }
+
+/* ══════════════════════════════════════════════════════════════════
+   MODALES — Ventanas emergentes para formularios
+   ─────────────────────────────────────────────────────────────────
+   El overlay cubre toda la pantalla con un fondo oscuro semitransparente.
+   El modal aparece centrado en pantalla con una animación suave.
+   La clase .modal-visible activa la visibilidad de ambos.
+══════════════════════════════════════════════════════════════════ */
+
+/* Fondo oscuro que bloquea la interacción con el resto de la página */
+.modal-overlay {
+    position: fixed;
+    inset: 0; /* Cubre toda la pantalla: top:0, right:0, bottom:0, left:0 */
+    background: rgba(15,23,42,0.55); /* Azul oscuro semitransparente */
+    z-index: 200;
+    backdrop-filter: blur(4px); /* Efecto de desenfoque del fondo */
+    opacity: 0;
+    pointer-events: none;       /* No recibe clics cuando está oculto */
+    transition: opacity 0.25s;
+}
+
+/* Al activarse, el overlay aparece con transición */
+.modal-overlay.modal-visible { opacity: 1; pointer-events: all; }
+
+/* Tarjeta del modal centrada en pantalla */
+.modal {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -46%); /* Un poco por encima del centro para la animación de entrada */
+    background: var(--superficie);
+    border-radius: 16px;
+    width: 90%;
+    max-width: 520px;
+    max-height: 90vh;
+    overflow-y: auto;  /* Scroll si el modal es más alto que la pantalla */
+    z-index: 201;      /* Por encima del overlay */
+    box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.25s, transform 0.25s;
+}
+
+/* Al activarse, el modal baja a su posición final y se hace visible */
+.modal.modal-visible { opacity: 1; pointer-events: all; transform: translate(-50%, -50%); }
+/* Modal pequeño (para confirmaciones de borrado) */
+.modal-sm            { max-width: 400px; }
+
+/* Cabecera del modal: título + botón de cerrar (se queda fija al hacer scroll) */
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 18px 24px;
+    border-bottom: 1px solid var(--borde);
+    position: sticky; /* Se queda fija al hacer scroll dentro del modal */
+    top: 0;
+    background: var(--superficie);
+    z-index: 1;
+}
+
+/* Título del modal */
+.modal-header h3   { font-size: 1rem; font-weight: 700; color: var(--texto-primario); }
+/* Botón de cerrar (X) */
+.modal-cerrar      { background: none; border: none; color: var(--texto-suave); font-size: 1rem; cursor: pointer; padding: 4px 8px; border-radius: 6px; transition: background 0.15s; }
+.modal-cerrar:hover{ background: var(--fondo-app); color: var(--texto-primario); }
+
+/* Cuerpo del modal: área de formulario */
+.modal-body { padding: 20px 24px; display: flex; flex-direction: column; gap: 14px; }
+
+/* Grid de dos columnas dentro del modal (para campos pequeños) */
+.modal-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+
+/* Etiqueta de campo del formulario */
+.modal-campo label { display: block; font-size: 0.8rem; font-weight: 600; color: #374151; margin-bottom: 6px; }
+
+/* Campos del formulario modal (input, textarea y select comparten estilos) */
+.modal-campo input,
+.modal-campo textarea,
+.modal-campo select {
+    width: 100%;
+    padding: 10px 13px;
+    border: 1.5px solid var(--borde);
+    border-radius: 9px;
+    font-size: 0.875rem;
+    font-family: var(--fuente);
+    color: var(--texto-primario);
+    background: var(--fondo-app);
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    resize: vertical; /* Solo permite redimensionar verticalmente el textarea */
+}
+
+/* Al enfocar cualquier campo del modal, borde verde */
+.modal-campo input:focus,
+.modal-campo textarea:focus,
+.modal-campo select:focus {
+    border-color: var(--verde-primario);
+    box-shadow: 0 0 0 3px rgba(0,204,153,0.1);
+    background: var(--superficie);
+}
+
+/* Mensaje de error bajo cada campo del modal */
+.modal-error { display: block; font-size: 0.72rem; color: #ef4444; margin-top: 4px; }
+
+/* Pie del modal: botones de cancelar y guardar (se queda fijo al hacer scroll) */
+.modal-footer {
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
+    padding: 14px 24px;
+    border-top: 1px solid var(--borde);
+    position: sticky;
+    bottom: 0;
+    background: var(--superficie);
+}
+
+/* Botón cancelar: sin fondo, solo borde gris */
+.btn-modal-cancelar {
+    padding: 9px 18px;
+    background: none;
+    border: 1.5px solid var(--borde);
+    border-radius: 9px;
+    color: var(--texto-secundario);
+    font-size: 0.875rem;
+    font-family: var(--fuente);
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.15s;
+}
+
+.btn-modal-cancelar:hover { background: var(--fondo-app); }
+
+/* Botón guardar: verde con sombra */
+.btn-modal-guardar {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    padding: 9px 20px;
+    background: var(--verde-primario);
+    color: white;
+    border: none;
+    border-radius: 9px;
+    font-size: 0.875rem;
+    font-weight: 700;
+    font-family: var(--fuente);
+    cursor: pointer;
+    transition: background 0.15s, transform 0.1s;
+    box-shadow: 0 3px 10px rgba(0,204,153,0.3);
+}
+
+.btn-modal-guardar:hover  { background: var(--verde-oscuro); transform: translateY(-1px); }
+
+/* Botón eliminar: rojo (para el modal de confirmación de borrado) */
+.btn-modal-eliminar {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    padding: 9px 20px;
+    background: #ef4444;
+    color: white;
+    border: none;
+    border-radius: 9px;
+    font-size: 0.875rem;
+    font-weight: 700;
+    font-family: var(--fuente);
+    cursor: pointer;
+    transition: background 0.15s;
+}
+
+.btn-modal-eliminar:hover { background: #dc2626; }

@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DI-PYMES | Mis Pedidos</title>
+    <!-- Tipografía Inter de Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Font Awesome para los iconos -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Estilos base del panel (topbar, stats-row, botones genéricos) -->
+    <link rel="stylesheet" href="style_dashboard.css">
+    <!-- Estilos específicos del panel del cliente (tarjetas de pedido, modal de detalle) -->
+    <link rel="stylesheet" href="style_cliente.css">
+</head>
+
+<!--
+ ============================================================
+   PANEL DEL CLIENTE — Historial de pedidos
+   -----------------------------------------
+   Permite al cliente ver todos sus pedidos y consultar el
+   detalle de cada uno (productos, cantidades, importe total).
+
+   Estructura de la página:
+     .worker-topbar  → barra superior fija (logo, saludo, botón salir)
+     .worker-main    → contenido principal
+       .stats-row    → 4 tarjetas de resumen (pedidos totales, en proceso, entregados, gastado)
+       .filtros-cliente → barra de búsqueda + botones de filtro por estado
+       .pedidos-lista   → lista de tarjetas de pedido generadas por el JS
+ ============================================================
+-->
+<body class="worker-body">
+
+    <!-- ═══════════════════════════════════════════════════════
+         TOPBAR — Barra superior del panel del cliente
+         ─────────────────────────────────────────────────────
+         Igual que el del trabajador pero sin el badge de turno
+         (el cliente no tiene turno, tiene el texto "Cliente").
+    ═══════════════════════════════════════════════════════ -->
+    <header class="worker-topbar">
+        <!-- Logo y nombre de la aplicación -->
+        <div class="topbar-brand">
+            <div class="topbar-logo"><i class="fas fa-building"></i></div>
+            <span class="topbar-nombre-app">DI-PYMES</span>
+        </div>
+
+        <!-- Saludo personalizado: el JS pone el nombre del cliente aquí -->
+        <div class="topbar-saludo">
+            <p class="saludo-texto" id="saludoTexto">Mis Pedidos</p>
+            <p class="saludo-fecha" id="saludoFecha">Cargando...</p>
+        </div>
+
+        <!-- Acciones del lado derecho: rol y botón salir -->
+        <div class="topbar-acciones">
+            <!-- Badge que indica el rol del usuario logueado -->
+            <span class="turno-badge">
+                <i class="fas fa-user"></i> Cliente
+            </span>
+            <!-- Botón de cerrar sesión: limpia el sessionStorage y vuelve al login -->
+            <button class="btn-salir" onclick="cerrarSesion()">
+                <i class="fas fa-sign-out-alt"></i> Salir
+            </button>
+        </div>
+    </header>
+
+    <!-- ═══════════════════════════════════════════════════════
+         CONTENIDO PRINCIPAL
+    ═══════════════════════════════════════════════════════ -->
+    <main class="worker-main">
+
+        <!-- ── ESTADÍSTICAS RÁPIDAS ──────────────────────────────
+             El JS genera aquí las 4 tarjetas de resumen con:
+               1. Total de pedidos realizados
+               2. Pedidos actualmente en proceso
+               3. Pedidos ya entregados
+               4. Total gastado en pedidos entregados
+             Se genera dinámicamente con renderStats() en cliente.js.
+        ─────────────────────────────────────────────────────── -->
+        <div class="stats-row" id="statsRow"></div>
+
+        <!-- ── BARRA DE FILTROS Y BÚSQUEDA ───────────────────────
+             Permite filtrar la lista de pedidos por estado
+             o buscar por número de pedido o fecha.
+        ─────────────────────────────────────────────────────── -->
+        <div class="filtros-cliente">
+            <!-- Campo de búsqueda de texto -->
+            <!-- oninput llama a renderPedidos() cada vez que el usuario escribe algo -->
+            <div class="filtros-busqueda-cli">
+                <i class="fas fa-search"></i>
+                <input type="text" id="busquedaPedidos" placeholder="Buscar por nº de pedido o fecha..." oninput="renderPedidos()">
+            </div>
+
+            <!-- Botones de filtro por estado del pedido -->
+            <!-- Cada botón llama a setFiltroPedido() con el filtro correspondiente -->
+            <div class="filtros-botones-cli">
+                <!-- Mostrar todos los pedidos (activo por defecto) -->
+                <button class="filtro-btn-cli activo" data-f="todos"      onclick="setFiltroPedido('todos',this)">Todos</button>
+                <!-- Solo pedidos en proceso -->
+                <button class="filtro-btn-cli"         data-f="EN_PROCESO" onclick="setFiltroPedido('EN_PROCESO',this)">En Proceso</button>
+                <!-- Solo pedidos entregados -->
+                <button class="filtro-btn-cli"         data-f="ENTREGADO"  onclick="setFiltroPedido('ENTREGADO',this)">Entregados</button>
+                <!-- Solo pedidos cancelados -->
+                <button class="filtro-btn-cli"         data-f="CANCELADO"  onclick="setFiltroPedido('CANCELADO',this)">Cancelados</button>
+            </div>
+        </div>
+
+        <!-- ── LISTA DE PEDIDOS ───────────────────────────────────
+             El JS genera aquí una tarjeta por cada pedido del cliente.
+             Cada tarjeta muestra: número, fecha, estado, importe y botón "Ver detalle".
+             El botón abre el modal con las líneas del pedido.
+             Si no hay pedidos, muestra un mensaje de "bandeja vacía".
+        ─────────────────────────────────────────────────────── -->
+        <div class="pedidos-lista" id="pedidosLista"></div>
+
+    </main>
+
+    <!-- ═══════════════════════════════════════════════════════
+         MODAL — Detalle del pedido
+         ─────────────────────────────────────────────────────
+         Se abre cuando el cliente pulsa "Ver detalle" en una tarjeta.
+         El JS carga las líneas del pedido desde la API y las muestra
+         en una tabla con: producto, cantidad, precio unitario y subtotal.
+
+         Al hacer clic en el overlay oscuro, el modal se cierra.
+    ═══════════════════════════════════════════════════════ -->
+
+    <!-- Fondo oscuro semitransparente que cubre la pantalla cuando el modal está abierto -->
+    <div class="modal-overlay" id="modalOverlay" onclick="cerrarModal()"></div>
+
+    <!-- Tarjeta del modal de detalle del pedido -->
+    <div class="modal-cli" id="modalDetalle">
+        <!-- Cabecera del modal: título con número y fecha del pedido + botón cerrar -->
+        <div class="modal-cli-header">
+            <!-- El JS rellena este título con el número y fecha del pedido seleccionado -->
+            <h3 id="modalTitulo">Detalle del Pedido</h3>
+            <button onclick="cerrarModal()"><i class="fas fa-times"></i></button>
+        </div>
+        <!--
+          Cuerpo del modal: el JS genera aquí el contenido completo.
+          Muestra mientras carga: "Cargando líneas..."
+          Después muestra: badge de estado + tabla de productos + mensaje final
+        -->
+        <div class="modal-cli-body" id="modalBody"></div>
+    </div>
+
+
+    <!-- Script con toda la lógica del panel del cliente -->
+    <script src="cliente.js"></script>
+
+</body>
+</html>

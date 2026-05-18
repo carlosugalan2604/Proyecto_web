@@ -217,14 +217,14 @@ function navegarA(pagina, elemento) {
     if (elemento) elemento.classList.add('active');
 
     // Actualizamos el título y subtítulo de la cabecera de contenido
-    const titulos    = { dashboard:'Visión General', stock:'Gestión de Stock', tareas:'Tareas del Equipo', trabajadores:'Trabajadores', finanzas:'Información Financiera' };
-    const subtitulos = { dashboard:'Resumen en tiempo real', stock:'Inventario y control de existencias', tareas:'Asignación y seguimiento de tareas', trabajadores:'Empleados y gestión de turnos', finanzas:'Ingresos, pedidos y facturación' };
+    const titulos    = { dashboard:'Visión General', stock:'Gestión de Stock', tareas:'Tareas del Equipo', trabajadores:'Trabajadores', pedidos:'Gestión de Pedidos', finanzas:'Información Financiera' };
+    const subtitulos = { dashboard:'Resumen en tiempo real', stock:'Inventario y control de existencias', tareas:'Asignación y seguimiento de tareas', trabajadores:'Empleados y gestión de turnos', pedidos:'Estado y seguimiento de pedidos de clientes', finanzas:'Ingresos, pedidos y facturación' };
     document.getElementById('pageTitulo').textContent    = titulos[pagina]    || '';
     document.getElementById('pageSubtitulo').textContent = subtitulos[pagina] || '';
 
     // El botón de acción principal solo aparece en secciones que tienen CRUD
     const btnAccion   = document.getElementById('btnAccionPrincipal');
-    const textoAccion = { stock:'Nuevo Producto', tareas:'Nueva Tarea', trabajadores:'Nuevo Trabajador' };
+    const textoAccion = { stock:'Nuevo Producto', tareas:'Nueva Tarea', trabajadores:'Nuevo Trabajador', pedidos:'' };
     if (textoAccion[pagina]) {
         document.getElementById('textoAccion').textContent = textoAccion[pagina];
         btnAccion.style.display = 'flex'; // Mostramos el botón
@@ -237,6 +237,7 @@ function navegarA(pagina, elemento) {
     if (pagina === 'stock')        renderStock();
     if (pagina === 'tareas')       renderTareasEquipo();
     if (pagina === 'trabajadores') renderTrabajadores();
+    if (pagina === 'pedidos')      recargarPedidos(); // Siempre recarga datos frescos de la API
     if (pagina === 'finanzas')     renderFinanzas();
 
     // En móvil, cerramos el sidebar automáticamente al navegar
@@ -292,9 +293,14 @@ function actualizarBadgesNav() {
     let tareasAbiertas = 0;
     tareasTodas.forEach(function(t) { if (t.estado !== 'COMPLETADA') tareasAbiertas++; });
 
+    // Pedidos EN_PROCESO (los que el gerente tiene que atender)
+    let pedidosEnProceso = 0;
+    pedidos.forEach(function(p) { if (p.estado === 'EN_PROCESO') pedidosEnProceso++; });
+
     // Actualizamos los badges en el HTML
-    document.getElementById('badgeStockNav').textContent  = alertasStock;
-    document.getElementById('badgeTareasNav').textContent = tareasAbiertas;
+    document.getElementById('badgeStockNav').textContent   = alertasStock;
+    document.getElementById('badgeTareasNav').textContent  = tareasAbiertas;
+    document.getElementById('badgePedidosNav').textContent = pedidosEnProceso;
 }
 
 /*
@@ -1137,8 +1143,12 @@ function renderFinanzas() {
             <td>${p.nombreCliente}</td>
             <td><strong>€ ${p.importe.toFixed(2)}</strong></td>
             <td><span class="badge ${badgeClase}">${badgeTexto}</span></td>
-            <!-- Botón para ver el detalle del pedido (líneas de producto) -->
-            <td><button class="btn-ver-todo" onclick="verDetallePedido(${p.id})">Ver líneas <i class="fas fa-arrow-right"></i></button></td>
+            <td style="display:flex;gap:6px;flex-wrap:wrap">
+                <!-- Botón para ver el detalle del pedido (líneas de producto) -->
+                <button class="btn-ver-todo" onclick="verDetallePedido(${p.id})">Ver líneas <i class="fas fa-arrow-right"></i></button>
+                <!-- Botón para cambiar el estado del pedido -->
+                <button class="btn-accion-tabla btn-editar" onclick="abrirModalEstadoPedido(${p.id})" title="Cambiar estado"><i class="fas fa-rotate"></i></button>
+            </td>
         </tr>`;
     });
     document.getElementById('tablaPedidosBody').innerHTML = filas;
@@ -1353,6 +1363,232 @@ function abrirModal(idModal) {
 function cerrarModales() {
     document.querySelectorAll('.modal').forEach(function(m) { m.classList.remove('modal-visible'); });
     document.getElementById('modalOverlay').classList.remove('modal-visible');
+}
+
+// =====================================================================
+// SECCIÓN GESTIÓN DE PEDIDOS (section-pedidos)
+// =====================================================================
+
+// Filtro activo en la sección de pedidos
+let filtroPedidosGestion = 'todos';
+
+/*
+ * recargarPedidos()
+ * ------------------
+ * Pide SIEMPRE datos frescos de la API antes de renderizar.
+ * Se llama al navegar a la sección y al pulsar "Actualizar".
+ * Así el gerente siempre ve los pedidos más recientes, incluidos
+ * los que han creado los clientes después de que el gerente entrara.
+ */
+async function recargarPedidos() {
+    document.getElementById('pedidosGestionContenedor').innerHTML =
+        '<p style="padding:20px;color:#64748b"><i class="fas fa-rotate-right fa-spin"></i> Cargando pedidos...</p>';
+    try {
+        // Recargamos pedidos y usuarios (para tener el nombre del cliente)
+        const [peds, users] = await Promise.all([
+            fetch(API_URL + '/api/pedidos').then(function(r) { return r.json(); }),
+            fetch(API_URL + '/api/usuarios').then(function(r) { return r.json(); })
+        ]);
+        todosUsuarios = users;
+        pedidos = peds.map(function(p) {
+            const cliente = users.find(function(u) { return u.idUsuario === p.idUsuario; });
+            return {
+                id:            p.idPedido,
+                fecha:         p.fechaPedido,
+                estado:        p.estado,
+                importe:       p.importeTotal,
+                nombreCliente: cliente ? cliente.nombre : 'Cliente #' + p.idUsuario,
+                idUsuario:     p.idUsuario
+            };
+        });
+        actualizarBadgesNav();
+        renderGestionPedidos();
+    } catch (e) {
+        document.getElementById('pedidosGestionContenedor').innerHTML =
+            '<p style="color:#ef4444;padding:20px">Error al conectar con el servidor.</p>';
+    }
+}
+
+/*
+ * filtrarPedidosGestion(filtro, el)
+ * ----------------------------------
+ * Cambia el filtro activo y repinta la tabla.
+ */
+function filtrarPedidosGestion(filtro, el) {
+    filtroPedidosGestion = filtro;
+    document.querySelectorAll('#section-pedidos .filtro-btn').forEach(function(b) { b.classList.remove('activo'); });
+    el.classList.add('activo');
+    renderGestionPedidos();
+}
+
+/*
+ * renderGestionPedidos()
+ * -----------------------
+ * Pinta la tabla de pedidos y los KPIs de la sección.
+ * Cada fila muestra: número, fecha, cliente, importe, estado y botones de acción.
+ * Los botones de estado cambian directamente el estado del pedido en la API.
+ */
+function renderGestionPedidos() {
+    // Actualizamos los KPIs
+    let nProceso = 0, nEntregados = 0, nCancelados = 0;
+    pedidos.forEach(function(p) {
+        if (p.estado === 'EN_PROCESO') nProceso++;
+        else if (p.estado === 'ENTREGADO') nEntregados++;
+        else if (p.estado === 'CANCELADO') nCancelados++;
+    });
+    document.getElementById('ped-kpi-proceso').textContent    = nProceso;
+    document.getElementById('ped-kpi-entregados').textContent = nEntregados;
+    document.getElementById('ped-kpi-cancelados').textContent = nCancelados;
+    document.getElementById('ped-kpi-total').textContent      = pedidos.length;
+
+    // Filtramos según el filtro activo
+    const lista = pedidos.filter(function(p) {
+        return filtroPedidosGestion === 'todos' || p.estado === filtroPedidosGestion;
+    });
+
+    if (lista.length === 0) {
+        document.getElementById('pedidosGestionContenedor').innerHTML =
+            '<p style="padding:24px;color:#64748b;text-align:center"><i class="fas fa-inbox"></i> No hay pedidos con el filtro seleccionado.</p>';
+        return;
+    }
+
+    // Construimos la tabla
+    let filas = '';
+    lista.forEach(function(p) {
+        let badgeClase, badgeTexto;
+        if (p.estado === 'EN_PROCESO')     { badgeClase = 'badge-info';    badgeTexto = 'En Proceso'; }
+        else if (p.estado === 'ENTREGADO') { badgeClase = 'badge-ok';      badgeTexto = 'Entregado';  }
+        else                               { badgeClase = 'badge-peligro'; badgeTexto = 'Cancelado';  }
+
+        // Botones de cambio de estado rápido — solo mostramos los que no son el estado actual
+        let botonesEstado = '';
+        if (p.estado !== 'ENTREGADO')  botonesEstado += `<button class="btn-accion-tabla btn-ok"      onclick="cambiarEstadoRapido(${p.id},'ENTREGADO')"  title="Marcar entregado"><i class="fas fa-circle-check"></i></button>`;
+        if (p.estado !== 'EN_PROCESO') botonesEstado += `<button class="btn-accion-tabla btn-editar"  onclick="cambiarEstadoRapido(${p.id},'EN_PROCESO')" title="Volver a proceso"><i class="fas fa-rotate-left"></i></button>`;
+        if (p.estado !== 'CANCELADO')  botonesEstado += `<button class="btn-accion-tabla btn-eliminar" onclick="cambiarEstadoRapido(${p.id},'CANCELADO')"  title="Cancelar pedido"><i class="fas fa-ban"></i></button>`;
+
+        filas += `<tr>
+            <td><code>#${String(p.id).padStart(4,'0')}</code></td>
+            <td>${p.fecha}</td>
+            <td><strong>${p.nombreCliente}</strong></td>
+            <td><strong>€ ${p.importe.toFixed(2)}</strong></td>
+            <td><span class="badge ${badgeClase}">${badgeTexto}</span></td>
+            <td style="display:flex;gap:4px;flex-wrap:wrap;align-items:center">
+                ${botonesEstado}
+                <button class="btn-ver-todo" onclick="verDetallePedido(${p.id})" style="margin-left:4px">
+                    Ver líneas <i class="fas fa-arrow-right"></i>
+                </button>
+            </td>
+        </tr>`;
+    });
+
+    document.getElementById('pedidosGestionContenedor').innerHTML = `
+        <table>
+            <thead>
+                <tr><th>#</th><th>Fecha</th><th>Cliente</th><th>Importe</th><th>Estado</th><th>Acciones</th></tr>
+            </thead>
+            <tbody>${filas}</tbody>
+        </table>`;
+}
+
+/*
+ * cambiarEstadoRapido(id, nuevoEstado)
+ * -------------------------------------
+ * Cambia el estado del pedido directamente sin modal de confirmación.
+ * Después de la petición actualiza el array local y repinta la tabla.
+ */
+async function cambiarEstadoRapido(id, nuevoEstado) {
+    try {
+        const response = await fetch(API_URL + '/api/pedidos/' + id + '/estado', {
+            method:  'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body:    JSON.stringify({ estado: nuevoEstado })
+        });
+        if (response.ok) {
+            const p = pedidos.find(function(x) { return x.id === id; });
+            if (p) p.estado = nuevoEstado;
+            actualizarBadgesNav();
+            renderGestionPedidos();
+        } else {
+            alert('No se pudo cambiar el estado.');
+        }
+    } catch (e) {
+        alert('Error de conexión con el servidor.');
+    }
+}
+
+// =====================================================================
+// GESTIÓN DE PEDIDOS — CAMBIO DE ESTADO (desde sección Finanzas)
+// =====================================================================
+
+/*
+ * abrirModalEstadoPedido(id)
+ * ---------------------------
+ * Abre un selector de estado inline para el pedido indicado.
+ * Muestra tres botones con los estados posibles y resalta el actual.
+ *
+ * Parámetros:
+ *   id → identificador del pedido a modificar
+ */
+function abrirModalEstadoPedido(id) {
+    const pedido = pedidos.find(function(p) { return p.id === id; });
+    if (!pedido) return;
+
+    // Usamos el modal de confirmación reutilizando su estructura
+    const estados = ['EN_PROCESO', 'ENTREGADO', 'CANCELADO'];
+    const labels  = { 'EN_PROCESO': 'En Proceso', 'ENTREGADO': 'Entregado', 'CANCELADO': 'Cancelado' };
+    const colores = { 'EN_PROCESO': '#3b82f6',    'ENTREGADO': '#22c55e',    'CANCELADO': '#ef4444' };
+
+    let botonesHTML = estados.map(function(est) {
+        const activo = pedido.estado === est ? 'outline:3px solid ' + colores[est] + ';' : '';
+        return `<button onclick="cambiarEstadoPedido(${id},'${est}')"
+                    style="padding:10px 18px;border-radius:8px;border:none;cursor:pointer;
+                           background:${colores[est]};color:#fff;font-weight:600;${activo}">
+                    ${labels[est]}
+                </button>`;
+    }).join('');
+
+    document.getElementById('confirmarMensaje').innerHTML =
+        `<p style="margin-bottom:16px">Pedido <strong>#${id}</strong> — ${pedido.nombreCliente}</p>
+         <p style="font-size:0.82rem;color:#64748b;margin-bottom:16px">Estado actual: <strong>${labels[pedido.estado]}</strong></p>
+         <div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:center">${botonesHTML}</div>`;
+
+    // Ocultamos el botón de confirmar del modal genérico (los botones ya confirman directamente)
+    document.getElementById('btnConfirmarEliminar').style.display = 'none';
+    abrirModal('modalConfirmar');
+}
+
+/*
+ * cambiarEstadoPedido(id, nuevoEstado)
+ * -------------------------------------
+ * Envía PUT /api/pedidos/{id}/estado a la API y actualiza el array local.
+ *
+ * Parámetros:
+ *   id          → identificador del pedido
+ *   nuevoEstado → 'EN_PROCESO', 'ENTREGADO' o 'CANCELADO'
+ */
+async function cambiarEstadoPedido(id, nuevoEstado) {
+    try {
+        const response = await fetch(API_URL + '/api/pedidos/' + id + '/estado', {
+            method:  'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body:    JSON.stringify({ estado: nuevoEstado })
+        });
+
+        if (response.ok) {
+            // Actualizamos el estado en el array local para no recargar toda la página
+            const p = pedidos.find(function(x) { return x.id === id; });
+            if (p) p.estado = nuevoEstado;
+
+            // Restauramos el botón de confirmar para usos futuros del modal
+            document.getElementById('btnConfirmarEliminar').style.display = '';
+            cerrarModales();
+            renderFinanzas(); // Repintamos la tabla de pedidos
+        } else {
+            alert('No se pudo cambiar el estado. Inténtalo de nuevo.');
+        }
+    } catch (e) {
+        alert('Error de conexión con el servidor.');
+    }
 }
 
 // =====================================================================

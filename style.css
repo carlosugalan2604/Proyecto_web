@@ -247,6 +247,8 @@ body {
 .nav-badge-peligro { background: rgba(239,68,68,0.2);  color: #f87171; }
 /* Badge amarillo (para tareas pendientes) */
 .nav-badge-aviso   { background: rgba(245,158,11,0.2); color: #fbbf24; }
+/* Badge azul (para pedidos en proceso) */
+.nav-badge-info    { background: rgba(59,130,246,0.2); color: #60a5fa; }
 
 /* Botón de cerrar sesión al pie del sidebar */
 .btn-logout {
@@ -1009,6 +1011,9 @@ td code {
 /* Botón eliminar: rojo claro */
 .btn-eliminar        { background: #fef2f2; color: #ef4444; }
 .btn-eliminar:hover  { background: #fee2e2; }
+/* Botón ok/confirmar: verde claro (marcar como entregado) */
+.btn-ok              { background: #f0fdf4; color: #16a34a; }
+.btn-ok:hover        { background: #dcfce7; }
 
 /* Badge azul para estado "En Progreso" */
 .badge-info    { background: #eff6ff; color: #1d4ed8; }

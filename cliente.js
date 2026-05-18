@@ -343,3 +343,136 @@ function cerrarModal() {
     document.getElementById('modalOverlay').classList.remove('modal-visible');
     document.getElementById('modalDetalle').classList.remove('modal-visible');
 }
+
+// =====================================================================
+// NUEVO PEDIDO
+// =====================================================================
+
+/*
+ * abrirModalNuevoPedido()
+ * ------------------------
+ * Abre el modal para crear un nuevo pedido.
+ * Genera una fila por cada producto del catálogo con controles de cantidad (+ / -).
+ * El botón "Confirmar pedido" llama a enviarPedido().
+ */
+function abrirModalNuevoPedido() {
+    // Construimos la lista de productos con sus controles de cantidad
+    let html = '<div style="padding:0 20px">';
+    if (productos.length === 0) {
+        html += '<p style="color:#64748b;padding:20px 0">No hay productos disponibles.</p>';
+    } else {
+        productos.forEach(function(p) {
+            html += `
+            <div class="linea-producto" id="linea-${p.idProducto}">
+                <div style="flex:1">
+                    <p class="linea-nombre">${p.nombre}</p>
+                    <p class="linea-precio">€ ${p.precio.toFixed(2)} c/u</p>
+                </div>
+                <div class="linea-cantidad">
+                    <button class="btn-qty" onclick="cambiarCantidad(${p.idProducto}, -1, ${p.precio})">−</button>
+                    <input class="input-qty" type="number" id="qty-${p.idProducto}" value="0" min="0" max="99"
+                           oninput="recalcularTotal()">
+                    <button class="btn-qty" onclick="cambiarCantidad(${p.idProducto}, +1, ${p.precio})">+</button>
+                </div>
+            </div>`;
+        });
+    }
+    html += '</div>';
+    document.getElementById('modalNuevoBody').innerHTML = html;
+    document.getElementById('totalNuevoPedido').textContent = '€ 0.00';
+    document.getElementById('modalNuevoOverlay').classList.add('modal-visible');
+    document.getElementById('modalNuevoPedido').classList.add('modal-visible');
+}
+
+/*
+ * cerrarModalNuevo()
+ * -------------------
+ * Cierra el modal de nuevo pedido.
+ */
+function cerrarModalNuevo() {
+    document.getElementById('modalNuevoOverlay').classList.remove('modal-visible');
+    document.getElementById('modalNuevoPedido').classList.remove('modal-visible');
+}
+
+/*
+ * cambiarCantidad(idProducto, delta, precio)
+ * -------------------------------------------
+ * Incrementa o decrementa en 1 la cantidad del producto indicado
+ * y recalcula el total del pedido.
+ */
+function cambiarCantidad(idProducto, delta) {
+    var input = document.getElementById('qty-' + idProducto);
+    var nuevo = Math.max(0, (parseInt(input.value) || 0) + delta);
+    input.value = nuevo;
+    recalcularTotal();
+}
+
+/*
+ * recalcularTotal()
+ * ------------------
+ * Lee todas las cantidades del modal y recalcula el importe total.
+ * Actualiza el texto del pie del modal.
+ */
+function recalcularTotal() {
+    var total = 0;
+    productos.forEach(function(p) {
+        var input = document.getElementById('qty-' + p.idProducto);
+        if (input) {
+            var qty = parseInt(input.value) || 0;
+            total += qty * p.precio;
+        }
+    });
+    document.getElementById('totalNuevoPedido').textContent = '€ ' + total.toFixed(2);
+}
+
+/*
+ * enviarPedido()
+ * ---------------
+ * Recoge las cantidades del modal, descarta los productos con cantidad 0,
+ * y envía el pedido a la API con POST /api/pedidos.
+ * Si todo va bien, cierra el modal y recarga la lista de pedidos.
+ */
+async function enviarPedido() {
+    var idUsuario = parseInt(sessionStorage.getItem('usuario_id'));
+    var lineas = [];
+
+    // Recogemos solo los productos con cantidad > 0
+    productos.forEach(function(p) {
+        var input = document.getElementById('qty-' + p.idProducto);
+        if (input) {
+            var qty = parseInt(input.value) || 0;
+            if (qty > 0) lineas.push({ idProducto: p.idProducto, cantidad: qty });
+        }
+    });
+
+    if (lineas.length === 0) {
+        alert('Añade al menos un producto al pedido.');
+        return;
+    }
+
+    try {
+        var response = await fetch(API_URL + '/api/pedidos', {
+            method:  'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body:    JSON.stringify({ idUsuario: idUsuario, lineas: lineas })
+        });
+
+        if (response.ok) {
+            var nuevo = await response.json();
+            // Añadimos el nuevo pedido al array local para que aparezca sin recargar
+            misPedidos.unshift({
+                id:      nuevo.idPedido,
+                fecha:   nuevo.fechaPedido,
+                estado:  nuevo.estado,
+                importe: nuevo.importeTotal
+            });
+            cerrarModalNuevo();
+            renderStats();
+            renderPedidos();
+        } else {
+            alert('Error al crear el pedido. Inténtalo de nuevo.');
+        }
+    } catch (e) {
+        alert('No se pudo conectar con el servidor.');
+    }
+}

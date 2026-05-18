@@ -93,6 +93,11 @@
         <a class="nav-item" data-pagina="trabajadores" onclick="navegarA('trabajadores',this)">
             <i class="fas fa-users nav-icono"></i><span>Trabajadores</span>
         </a>
+        <!-- Pedidos: badge azul con pedidos EN_PROCESO pendientes de atender -->
+        <a class="nav-item" data-pagina="pedidos" onclick="navegarA('pedidos',this)">
+            <i class="fas fa-shopping-cart nav-icono"></i><span>Gestión de Pedidos</span>
+            <span class="nav-badge nav-badge-info" id="badgePedidosNav">0</span>
+        </a>
         <!-- Finanzas: sin badge -->
         <a class="nav-item" data-pagina="finanzas" onclick="navegarA('finanzas',this)">
             <i class="fas fa-euro-sign nav-icono"></i><span>Información Financiera</span>
@@ -419,6 +424,78 @@
                     <div class="grafico-barras" id="graficoBars"></div>
                 </div>
             </div>
+        </div>
+
+        <!-- ══════════════════════════════════════════════════════════
+             SECCIÓN 6: GESTIÓN DE PEDIDOS
+             Vista operativa: el gerente ve todos los pedidos,
+             filtra por estado y cambia el estado de cada uno.
+             Se recarga desde la API cada vez que se navega aquí.
+        ══════════════════════════════════════════════════════════ -->
+        <div id="section-pedidos" class="page-section" style="display:none">
+
+            <!-- KPIs rápidos de pedidos -->
+            <div class="kpi-grid" style="margin-bottom:20px">
+                <div class="kpi-card kpi-azul">
+                    <div class="kpi-icono-wrapper"><i class="fas fa-clock"></i></div>
+                    <div class="kpi-datos">
+                        <p class="kpi-etiqueta">En Proceso</p>
+                        <p class="kpi-valor" id="ped-kpi-proceso">0</p>
+                        <p class="kpi-tendencia">Pendientes de preparar</p>
+                    </div>
+                </div>
+                <div class="kpi-card kpi-verde">
+                    <div class="kpi-icono-wrapper"><i class="fas fa-circle-check"></i></div>
+                    <div class="kpi-datos">
+                        <p class="kpi-etiqueta">Entregados</p>
+                        <p class="kpi-valor" id="ped-kpi-entregados">0</p>
+                        <p class="kpi-tendencia tendencia-positiva">Completados</p>
+                    </div>
+                </div>
+                <div class="kpi-card kpi-rojo">
+                    <div class="kpi-icono-wrapper"><i class="fas fa-ban"></i></div>
+                    <div class="kpi-datos">
+                        <p class="kpi-etiqueta">Cancelados</p>
+                        <p class="kpi-valor" id="ped-kpi-cancelados">0</p>
+                        <p class="kpi-tendencia tendencia-negativa">Requieren revisión</p>
+                    </div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-icono-wrapper"><i class="fas fa-list"></i></div>
+                    <div class="kpi-datos">
+                        <p class="kpi-etiqueta">Total</p>
+                        <p class="kpi-valor" id="ped-kpi-total">0</p>
+                        <p class="kpi-tendencia">Todos los pedidos</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tabla de pedidos con filtros y botón actualizar -->
+            <div class="panel-card">
+                <div class="panel-card-header">
+                    <h3><i class="fas fa-shopping-cart"></i> Pedidos de Clientes</h3>
+                    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+                        <!-- Filtros de estado -->
+                        <button class="filtro-btn activo" id="ped-f-todos"
+                                onclick="filtrarPedidosGestion('todos',this)">Todos</button>
+                        <button class="filtro-btn" id="ped-f-proceso"
+                                onclick="filtrarPedidosGestion('EN_PROCESO',this)">En Proceso</button>
+                        <button class="filtro-btn" id="ped-f-entregado"
+                                onclick="filtrarPedidosGestion('ENTREGADO',this)">Entregados</button>
+                        <button class="filtro-btn" id="ped-f-cancelado"
+                                onclick="filtrarPedidosGestion('CANCELADO',this)">Cancelados</button>
+                        <!-- Botón para recargar datos frescos de la API -->
+                        <button class="btn-ver-todo" onclick="recargarPedidos()" style="margin-left:8px">
+                            <i class="fas fa-rotate-right"></i> Actualizar
+                        </button>
+                    </div>
+                </div>
+                <div class="tabla-wrapper">
+                    <!-- El JS renderiza las filas aquí -->
+                    <div id="pedidosGestionContenedor"></div>
+                </div>
+            </div>
+
         </div>
 
     </main><!-- fin page-content -->

@@ -144,6 +144,91 @@
     </div>
 
 
+    <!-- ═══════════════════════════════════════════════════════
+         BOTÓN FLOTANTE — Hacer nuevo pedido
+         Aparece en la esquina inferior derecha.
+         Al pulsarlo abre el modal de selección de productos.
+    ═══════════════════════════════════════════════════════ -->
+    <button class="fab-nuevo-pedido" onclick="abrirModalNuevoPedido()" title="Hacer nuevo pedido">
+        <i class="fas fa-plus"></i>
+    </button>
+
+    <!-- ═══════════════════════════════════════════════════════
+         MODAL — Nuevo pedido
+         El cliente selecciona productos y cantidades y confirma.
+    ═══════════════════════════════════════════════════════ -->
+    <div class="modal-overlay" id="modalNuevoOverlay" onclick="cerrarModalNuevo()"></div>
+    <div class="modal-cli" id="modalNuevoPedido" style="max-width:520px">
+        <div class="modal-cli-header">
+            <h3><i class="fas fa-cart-plus"></i> Nuevo Pedido</h3>
+            <button onclick="cerrarModalNuevo()"><i class="fas fa-times"></i></button>
+        </div>
+        <div class="modal-cli-body" id="modalNuevoBody">
+            <!-- El JS rellena aquí la lista de productos con sus controles de cantidad -->
+        </div>
+        <div style="padding:16px 20px;border-top:1px solid #e2e8f0;display:flex;justify-content:space-between;align-items:center">
+            <p style="font-size:0.9rem;color:#64748b">Total: <strong id="totalNuevoPedido">€ 0.00</strong></p>
+            <button class="btn-ver-detalle" onclick="enviarPedido()" style="background:#00CC99;color:#fff;border:none;padding:10px 20px;border-radius:8px;cursor:pointer;font-weight:600">
+                <i class="fas fa-check"></i> Confirmar pedido
+            </button>
+        </div>
+    </div>
+
+    <style>
+        /* Botón flotante nuevo pedido */
+        .fab-nuevo-pedido {
+            position: fixed;
+            bottom: 28px;
+            right: 28px;
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            background: #00CC99;
+            color: #fff;
+            border: none;
+            font-size: 1.4rem;
+            cursor: pointer;
+            box-shadow: 0 4px 16px rgba(0,204,153,0.4);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.15s, box-shadow 0.15s;
+            z-index: 900;
+        }
+        .fab-nuevo-pedido:hover { transform: scale(1.08); box-shadow: 0 6px 20px rgba(0,204,153,0.5); }
+
+        /* Fila de producto en el modal de nuevo pedido */
+        .linea-producto {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 0;
+            border-bottom: 1px solid #f1f5f9;
+        }
+        .linea-producto:last-child { border-bottom: none; }
+        .linea-nombre { flex: 1; font-size: 0.88rem; font-weight: 500; color: #1e293b; }
+        .linea-precio { font-size: 0.8rem; color: #64748b; }
+        .linea-cantidad {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .btn-qty {
+            width: 28px; height: 28px; border-radius: 50%;
+            border: 1px solid #e2e8f0; background: #f8fafc;
+            cursor: pointer; font-size: 1rem; line-height: 1;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .btn-qty:hover { background: #e2e8f0; }
+        .input-qty {
+            width: 36px; text-align: center; border: 1px solid #e2e8f0;
+            border-radius: 6px; padding: 4px; font-size: 0.88rem;
+        }
+        /* Ocultar el modal de nuevo pedido hasta que se abra */
+        #modalNuevoPedido { display: none; }
+        #modalNuevoPedido.modal-visible { display: flex; flex-direction: column; }
+    </style>
+
     <!-- Script con toda la lógica del panel del cliente -->
     <script src="cliente.js"></script>
 
